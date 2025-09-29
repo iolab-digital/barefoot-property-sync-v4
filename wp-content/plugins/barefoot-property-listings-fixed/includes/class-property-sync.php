@@ -432,7 +432,7 @@ class Barefoot_Property_Sync {
         $api_property_ids = array();
         
         foreach ($api_properties as $property_data) {
-            $property_id = $this->get_property_field($property_data, 'PropertyId');
+            $property_id = $this->get_property_field($property_data, 'PropertyID');
             if ($property_id) {
                 $api_property_ids[] = $property_id;
             }
