@@ -73,7 +73,8 @@ try {
                             $properties = $xml->xpath('//Property | //property | //*[contains(name(), "Property")]');
                             if (!empty($properties)) {
                                 echo "🎉 Found " . count($properties) . " property nodes!\n<br>";
-                                break 2; // Exit both loops if we found properties
+                                echo "<strong>This method returned actual property data!</strong>\n<br>";
+                                return; // Exit the script as we found working data
                             }
                         }
                     }
