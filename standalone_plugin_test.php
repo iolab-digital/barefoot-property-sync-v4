@@ -19,12 +19,10 @@ define('BAREFOOT_API_VERSION', 'v3chfa0604');
 define('BAREFOOT_VERSION', '1.0.1');
 
 // Mock WordPress functions
-function error_log($message) {
-    echo "<div style='color: #666; font-size: 0.9em; margin: 5px 0;'>LOG: " . htmlspecialchars($message) . "</div>\n";
-}
-
-function esc_html($text) {
-    return htmlspecialchars($text);
+if (!function_exists('esc_html')) {
+    function esc_html($text) {
+        return htmlspecialchars($text);
+    }
 }
 
 try {
