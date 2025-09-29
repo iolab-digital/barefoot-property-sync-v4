@@ -129,11 +129,13 @@ class Barefoot_API {
                     error_log("Trying method: {$method}");
                     $response = $this->soap_client->$method($params);
             
-            // Debug: Log the entire response structure
-            error_log('Barefoot API Response: ' . print_r($response, true));
-            
-            if (isset($response->GetAllPropertyResult)) {
-                $result = $response->GetAllPropertyResult;
+                    // Debug: Log the entire response structure
+                    error_log("Barefoot API Response for {$method}: " . print_r($response, true));
+                    
+                    // Check for different result property names
+                    $result_property = $method . 'Result';
+                    if (isset($response->$result_property)) {
+                        $result = $response->$result_property;
                 
                 // Debug: Log the result structure
                 error_log('Barefoot GetAllPropertyResult: ' . print_r($result, true));
