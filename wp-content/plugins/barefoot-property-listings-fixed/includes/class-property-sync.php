@@ -35,6 +35,26 @@ class Barefoot_Property_Sync {
             $properties = $api_response['data'];
             $synced_count = 0;
             
+            // Handle case where API responds successfully but has no properties
+            if (empty($properties)) {
+                $message_details = isset($api_response['message']) ? $api_response['message'] : '';
+                $method_used = isset($api_response['method_used']) ? $api_response['method_used'] : 'Unknown';
+                
+                error_log('Barefoot Property Sync: API responded successfully but returned no properties');
+                error_log('Method used: ' . $method_used);
+                error_log('Details: ' . $message_details);
+                
+                $result['success'] = true;
+                $result['count'] = 0;
+                $result['message'] = 'API connection successful but no properties found. This may indicate: 1) No properties are configured in your Barefoot account, 2) Additional API permissions may be needed, or 3) The account may need additional setup.';
+                
+                if (!empty($message_details)) {
+                    $result['message'] .= ' Details: ' . $message_details;
+                }
+                
+                return $result;
+            }
+            
             foreach ($properties as $property_data) {
                 $sync_result = $this->sync_single_property($property_data);
                 
