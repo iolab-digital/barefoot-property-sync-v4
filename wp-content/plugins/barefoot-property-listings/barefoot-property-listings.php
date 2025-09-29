@@ -28,6 +28,11 @@ define('BAREFOOT_API_VERSION', 'v3chfa0604');
 class BarefootPropertyListings {
     
     public function __construct() {
+        // Check if we're in WordPress environment
+        if (!function_exists('add_action')) {
+            return;
+        }
+        
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
