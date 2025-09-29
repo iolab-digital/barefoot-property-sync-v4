@@ -56,7 +56,8 @@ try {
         if (count($functions) > 10) {
             echo "   ... and " . (count($functions) - 10) . " more functions\n";
         }
-    }\n    
+    }
+    
     echo "\n";
     
     // Test a simple API call
