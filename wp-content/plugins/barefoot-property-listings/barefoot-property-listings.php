@@ -495,6 +495,16 @@ class BarefootPropertyListings {
             }
         }
     }
+    
+    /**
+     * Admin notice for missing SOAP extension
+     */
+    public function soap_extension_notice() {
+        echo '<div class="notice notice-error"><p>';
+        echo '<strong>Barefoot Property Listings:</strong> PHP SOAP extension is required but not installed. ';
+        echo 'Please contact your hosting provider to enable the SOAP extension.';
+        echo '</p></div>';
+    }
 }
 
 // Initialize the plugin
