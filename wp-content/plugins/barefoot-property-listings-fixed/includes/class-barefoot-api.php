@@ -108,9 +108,26 @@ class Barefoot_API {
         }
         
         try {
+            // First, let's log available methods
+            $functions = $this->soap_client->__getFunctions();
+            error_log('Available SOAP methods: ' . print_r($functions, true));
+            
             $params = $this->get_auth_params();
             
-            $response = $this->soap_client->GetAllProperty($params);
+            // Try different method names that might work
+            $methods_to_try = array(
+                'GetAllProperty',
+                'GetAllProperties', 
+                'GetProperties',
+                'GetPropertyList',
+                'GetAllPropertyList',
+                'GetPropertyData'
+            );
+            
+            foreach ($methods_to_try as $method) {
+                try {
+                    error_log("Trying method: {$method}");
+                    $response = $this->soap_client->$method($params);
             
             // Debug: Log the entire response structure
             error_log('Barefoot API Response: ' . print_r($response, true));
