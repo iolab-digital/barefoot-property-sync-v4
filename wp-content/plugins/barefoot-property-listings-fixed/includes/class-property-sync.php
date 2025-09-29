@@ -69,25 +69,25 @@ class Barefoot_Property_Sync {
             // Debug: Log the property data structure
             error_log('Syncing property data: ' . print_r($property_data, true));
             
-            // Extract property information
-            $property_id = $this->get_property_field($property_data, 'PropertyId');
-            $property_name = $this->get_property_field($property_data, 'PropertyName');
+            // Extract property information using correct WSDL field names
+            $property_id = $this->get_property_field($property_data, 'PropertyID'); // Note: PropertyID not PropertyId
+            $property_name = $this->get_property_field($property_data, 'Name'); // Note: Name not PropertyName  
             $property_description = $this->get_property_field($property_data, 'Description');
             
             // Debug: Log extracted values
             error_log("Extracted values - ID: {$property_id}, Name: {$property_name}");
             
-            // Try alternative field names if primary ones don't work
+            // Try alternative field names if primary ones don't work (for backwards compatibility)
             if (empty($property_id)) {
-                $property_id = $this->get_property_field($property_data, 'ID') ?: 
-                              $this->get_property_field($property_data, 'id') ?: 
-                              $this->get_property_field($property_data, 'PropertyID');
+                $property_id = $this->get_property_field($property_data, 'PropertyId') ?: 
+                              $this->get_property_field($property_data, 'ID') ?: 
+                              $this->get_property_field($property_data, 'id');
             }
             
             if (empty($property_name)) {
-                $property_name = $this->get_property_field($property_data, 'Name') ?: 
-                                $this->get_property_field($property_data, 'Title') ?: 
-                                $this->get_property_field($property_data, 'PropertyTitle');
+                $property_name = $this->get_property_field($property_data, 'PropertyName') ?: 
+                                $this->get_property_field($property_data, 'PropertyTitle') ?: 
+                                $this->get_property_field($property_data, 'Title');
             }
             
             error_log("After alternative fields - ID: {$property_id}, Name: {$property_name}");
