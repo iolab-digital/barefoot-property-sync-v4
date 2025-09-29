@@ -283,7 +283,7 @@ class BarefootPropertyListings {
                         }
                     },
                     error: function() {
-                        logContainer.append('<div style="color: red;">✗ Sync request failed</div>');
+                        logContainer.append('<div style=\"color: red;\">✗ Sync request failed</div>');
                     },
                     complete: function() {
                         button.prop('disabled', false).text('Sync Properties');
