@@ -135,10 +135,16 @@ class Barefoot_API {
                     
                     if ($xml !== false) {
                         // Try different XPath patterns
-                        $property_nodes = $xml->xpath('//Property') ?: 
-                                         $xml->xpath('//property') ?: 
-                                         $xml->xpath('//*[contains(name(), "Property")]') ?:
-                                         $xml->xpath('//*');
+                        $property_nodes = $xml->xpath('//Property');
+                        if (empty($property_nodes)) {
+                            $property_nodes = $xml->xpath('//property');
+                        }
+                        if (empty($property_nodes)) {
+                            $property_nodes = $xml->xpath('//*[contains(name(), "Property")]');
+                        }
+                        if (empty($property_nodes)) {
+                            $property_nodes = $xml->xpath('//*');
+                        }
                         
                         error_log('Found property nodes: ' . count($property_nodes));
                         
@@ -161,7 +167,56 @@ class Barefoot_API {
                             }
                             
                             $properties[] = $property;
-                        }\n                        \n                    } else {\n                        // XML parsing failed, log errors\n                        $xml_errors = libxml_get_errors();\n                        error_log('Barefoot XML Parse Error: ' . print_r($xml_errors, true));\n                    }\n                    \n                } elseif (isset($result->schema) && isset($result->any)) {\n                    // DataSet format - try to extract from 'any' field\n                    error_log('Barefoot DataSet format detected');\n                    \n                } elseif (is_object($result)) {\n                    // Direct object format\n                    error_log('Barefoot Direct object format detected');\n                    \n                    // Check if result itself contains property data\n                    if (isset($result->PropertyInfo)) {\n                        $prop_info = $result->PropertyInfo;\n                        if (is_array($prop_info)) {\n                            $properties = $prop_info;\n                        } else {\n                            $properties = array($prop_info);\n                        }\n                    }\n                } elseif (is_array($result)) {\n                    // Array format\n                    error_log('Barefoot Array format detected');\n                    $properties = $result;\n                }\n                \n                error_log('Barefoot Final properties count: ' . count($properties));\n                \n                return array(\n                    'success' => true,\n                    'data' => $properties,\n                    'count' => count($properties)\n                );\n            }\n            \n            return array('success' => false, 'message' => 'No GetAllPropertyResult in response');\n            \n        } catch (SoapFault $e) {\n            error_log('Barefoot GetAllProperty SOAP Fault: ' . $e->getMessage());\n            return array('success' => false, 'message' => 'SOAP Fault: ' . $e->getMessage());\n        } catch (Exception $e) {\n            error_log('Barefoot GetAllProperty Error: ' . $e->getMessage());\n            return array('success' => false, 'message' => 'API Error: ' . $e->getMessage());\n        }\n    }
+                        }
+                        
+                    } else {
+                        // XML parsing failed, log errors
+                        $xml_errors = libxml_get_errors();
+                        error_log('Barefoot XML Parse Error: ' . print_r($xml_errors, true));
+                    }
+                    
+                } elseif (isset($result->schema) && isset($result->any)) {
+                    // DataSet format - try to extract from 'any' field
+                    error_log('Barefoot DataSet format detected');
+                    
+                } elseif (is_object($result)) {
+                    // Direct object format
+                    error_log('Barefoot Direct object format detected');
+                    
+                    // Check if result itself contains property data
+                    if (isset($result->PropertyInfo)) {
+                        $prop_info = $result->PropertyInfo;
+                        if (is_array($prop_info)) {
+                            $properties = $prop_info;
+                        } else {
+                            $properties = array($prop_info);
+                        }
+                    }
+                } elseif (is_array($result)) {
+                    // Array format
+                    error_log('Barefoot Array format detected');
+                    $properties = $result;
+                }
+                
+                error_log('Barefoot Final properties count: ' . count($properties));
+                
+                return array(
+                    'success' => true,
+                    'data' => $properties,
+                    'count' => count($properties)
+                );
+            }
+            
+            return array('success' => false, 'message' => 'No GetAllPropertyResult in response');
+            
+        } catch (SoapFault $e) {
+            error_log('Barefoot GetAllProperty SOAP Fault: ' . $e->getMessage());
+            return array('success' => false, 'message' => 'SOAP Fault: ' . $e->getMessage());
+        } catch (Exception $e) {
+            error_log('Barefoot GetAllProperty Error: ' . $e->getMessage());
+            return array('success' => false, 'message' => 'API Error: ' . $e->getMessage());
+        }
+    }
     
     /**
      * Get property images
