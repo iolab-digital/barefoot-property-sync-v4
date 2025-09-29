@@ -57,6 +57,12 @@ class BarefootPropertyListings {
     }
     
     private function includes() {
+        // Check if SOAP extension is available
+        if (!extension_loaded('soap')) {
+            add_action('admin_notices', array($this, 'soap_extension_notice'));
+            return;
+        }
+        
         require_once BAREFOOT_PLUGIN_DIR . 'includes/class-barefoot-api.php';
         require_once BAREFOOT_PLUGIN_DIR . 'includes/class-property-sync.php';
         require_once BAREFOOT_PLUGIN_DIR . 'includes/class-frontend-display.php';
