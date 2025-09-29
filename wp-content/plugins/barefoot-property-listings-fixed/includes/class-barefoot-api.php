@@ -101,6 +101,7 @@ class Barefoot_API {
     
     /**
      * Get all properties from Barefoot API
+     * Since GetAllProperty returns "Custom method", we'll use alternative approaches
      */
     public function get_all_properties() {
         if (!$this->soap_client) {
@@ -110,120 +111,53 @@ class Barefoot_API {
         try {
             $params = $this->get_auth_params();
             
-            error_log('Barefoot API: Attempting GetAllProperty with params: ' . print_r($params, true));
+            error_log('Barefoot API: Using corrected barefootAccount parameter: ' . $this->version);
             
-            // Try GetAllProperty method (this is the documented method)
+            // First, try GetAllProperty method (documented but returns custom method message)
             $response = $this->soap_client->GetAllProperty($params);
-            
-            // Log the raw response for debugging
-            $raw_response = $this->soap_client->__getLastResponse();
-            error_log('Barefoot API Raw Response: ' . substr($raw_response, 0, 1000));
             
             if (isset($response->GetAllPropertyResult)) {
                 $result = $response->GetAllPropertyResult;
-                error_log('Barefoot GetAllPropertyResult: ' . print_r($result, true));
                 
-                // Handle "This is a Custom method" response
-                if (isset($result->Message) && strpos($result->Message, 'Custom method') !== false) {
-                    error_log('Barefoot API: Received "Custom method" response - this may be expected behavior');
-                    
-                    // The API might be returning properties in a different way
-                    // Check if there are any hidden properties or if we need to handle this differently
-                    
-                    // Sometimes the response might contain data despite the message
-                    // Let's check all possible properties
-                    $properties = array();
-                    
-                    // Check for PROPERTIES/PROPERTY structure
-                    if (isset($result->PROPERTIES) && isset($result->PROPERTIES->PROPERTY)) {
-                        $property_data = $result->PROPERTIES->PROPERTY;
-                        $properties = is_array($property_data) ? $property_data : array($property_data);
-                        error_log('Found properties in PROPERTIES->PROPERTY: ' . count($properties));
-                    }
-                    
-                    // Check for 'any' XML field
-                    elseif (isset($result->any) && !empty($result->any)) {
-                        $xml_string = $result->any;
-                        error_log('Found XML data in any field: ' . substr($xml_string, 0, 500));
-                        
-                        libxml_use_internal_errors(true);
-                        $xml = simplexml_load_string($xml_string);
-                        
-                        if ($xml !== false) {
-                            // Try to find properties in XML
-                            $xpath_patterns = array(
-                                '//Property',
-                                '//property', 
-                                '//*[contains(name(), "Property")]'
-                            );
-                            
-                            foreach ($xpath_patterns as $pattern) {
-                                $property_nodes = $xml->xpath($pattern);
-                                if (!empty($property_nodes)) {
-                                    error_log("Found {count($property_nodes)} properties with XPath: {$pattern}");
-                                    
-                                    foreach ($property_nodes as $property_xml) {
-                                        $property = new stdClass();
-                                        
-                                        // Convert XML attributes to object properties
-                                        foreach ($property_xml->attributes() as $key => $value) {
-                                            $property->$key = (string)$value;
-                                        }
-                                        
-                                        // Convert XML child elements to object properties  
-                                        foreach ($property_xml->children() as $key => $value) {
-                                            $property->$key = (string)$value;
-                                        }
-                                        
-                                        $properties[] = $property;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    // If we found properties despite the "Custom method" message
-                    if (count($properties) > 0) {
-                        error_log("Successfully extracted {count($properties)} properties despite 'Custom method' message");
-                        return array(
-                            'success' => true,
-                            'data' => $properties,
-                            'count' => count($properties),
-                            'method_used' => 'GetAllProperty'
-                        );
-                    }
-                    
-                    // If no properties found, this might mean:
-                    // 1. The account has no properties
-                    // 2. Additional parameters are needed  
-                    // 3. Different method should be used
-                    error_log('Barefoot API: No properties found in GetAllProperty response');
-                    
-                    // Try alternative approach - get individual properties
-                    return $this->try_alternative_property_retrieval();
-                }
-                
-                // Handle normal response (if any)
+                // Check if we have actual property data despite "Custom method" message
                 $properties = array();
                 
                 if (isset($result->PROPERTIES) && isset($result->PROPERTIES->PROPERTY)) {
                     $property_data = $result->PROPERTIES->PROPERTY;
                     $properties = is_array($property_data) ? $property_data : array($property_data);
+                    error_log('Barefoot API: Found properties in PROPERTIES container: ' . count($properties));
                 } elseif (isset($result->any) && !empty($result->any)) {
-                    // Handle XML data
                     $properties = $this->parse_xml_properties($result->any);
+                    error_log('Barefoot API: Found properties in XML any field: ' . count($properties));
                 }
                 
-                return array(
-                    'success' => true,
-                    'data' => $properties,
-                    'count' => count($properties),
-                    'method_used' => 'GetAllProperty'
-                );
+                if (count($properties) > 0) {
+                    return array(
+                        'success' => true,
+                        'data' => $properties,
+                        'count' => count($properties),
+                        'method_used' => 'GetAllProperty'
+                    );
+                }
+                
+                // If GetAllProperty doesn't return data, try alternative methods
+                error_log('Barefoot API: GetAllProperty returned "Custom method" - trying alternative approaches');
             }
             
-            return array('success' => false, 'message' => 'No GetAllPropertyResult in response');
+            // Try alternative methods that are known to work
+            $alternative_results = $this->try_alternative_property_methods();
+            if ($alternative_results['success']) {
+                return $alternative_results;
+            }
+            
+            // If no properties found, return successful but empty result
+            return array(
+                'success' => true,
+                'data' => array(),
+                'count' => 0,
+                'method_used' => 'GetAllProperty',
+                'message' => 'API connection successful with corrected barefootAccount parameter, but no properties returned. This may indicate: 1) No properties are configured in this account, 2) Properties exist but require different API methods, or 3) Additional setup may be needed.'
+            );
             
         } catch (SoapFault $e) {
             error_log('Barefoot GetAllProperty SOAP Fault: ' . $e->getMessage());
@@ -237,18 +171,191 @@ class Barefoot_API {
     /**
      * Try alternative methods to retrieve properties
      */
-    private function try_alternative_property_retrieval() {
+    private function try_alternative_property_methods() {
         error_log('Barefoot API: Trying alternative property retrieval methods');
         
-        // For now, return empty result indicating the API responds but has no data
-        // In a real scenario, we might try other methods or contact support
-        return array(
-            'success' => true,
-            'data' => array(),
-            'count' => 0,
-            'method_used' => 'GetAllProperty (Custom method response)',
-            'message' => 'API responded with "Custom method" - may indicate no properties available or additional configuration needed'
+        $params = $this->get_auth_params();
+        $properties = array();
+        
+        // Try methods that are known to work with this account
+        $working_methods = array(
+            'GetProperty',
+            'GetPropertyExt',
+            'GetLastUpdatedProperty'
         );
+        
+        foreach ($working_methods as $method) {
+            try {
+                error_log("Barefoot API: Trying method: {$method}");
+                $response = $this->soap_client->$method($params);
+                
+                $result_key = $method . 'Result';
+                if (isset($response->$result_key)) {
+                    $result = $response->$result_key;
+                    
+                    if (isset($result->any) && !empty($result->any)) {
+                        $method_properties = $this->parse_xml_properties($result->any);
+                        if (!empty($method_properties)) {
+                            $properties = array_merge($properties, $method_properties);
+                            error_log("Barefoot API: Found " . count($method_properties) . " properties using {$method}");
+                        }
+                    }
+                }
+                
+            } catch (SoapFault $e) {
+                error_log("Barefoot API: Method {$method} failed with SOAP Fault: " . $e->getMessage());
+                continue;
+            } catch (Exception $e) {
+                error_log("Barefoot API: Method {$method} failed with error: " . $e->getMessage());
+                continue;
+            }
+        }
+        
+        // Try to get properties by ID range (if we know some IDs exist)
+        if (empty($properties)) {
+            $properties = $this->try_property_id_range();
+        }
+        
+        if (count($properties) > 0) {
+            // Remove duplicates based on property ID
+            $properties = $this->remove_duplicate_properties($properties);
+            
+            return array(
+                'success' => true,
+                'data' => $properties,
+                'count' => count($properties),
+                'method_used' => 'Alternative methods'
+            );
+        }
+        
+        return array('success' => false, 'message' => 'No properties found using alternative methods');
+    }
+    
+    /**
+     * Try to get properties by testing common property ID ranges
+     */
+    private function try_property_id_range() {
+        $params = $this->get_auth_params();
+        $properties = array();
+        
+        // Test first 10 property IDs to see if any exist
+        for ($id = 1; $id <= 10; $id++) {
+            try {
+                $property_params = array_merge($params, array('addressid' => $id));
+                $response = $this->soap_client->GetPropertyInfoById($property_params);
+                
+                if (isset($response->GetPropertyInfoByIdResult->any)) {
+                    $xml_data = $response->GetPropertyInfoByIdResult->any;
+                    
+                    // Check if it's a successful response
+                    libxml_use_internal_errors(true);
+                    $xml = simplexml_load_string($xml_data);
+                    if ($xml !== false && isset($xml->Success) && (string)$xml->Success === 'true') {
+                        // This means the property ID exists, but we might need more detailed info
+                        error_log("Barefoot API: Found existing property with ID: {$id}");
+                        
+                        // Try to get detailed property info
+                        $detailed_property = $this->get_detailed_property_info($id);
+                        if ($detailed_property) {
+                            $properties[] = $detailed_property;
+                        }
+                    }
+                }
+                
+            } catch (Exception $e) {
+                // Continue to next ID
+                continue;
+            }
+            
+            // Limit to prevent too many API calls
+            if (count($properties) >= 5) {
+                break;
+            }
+        }
+        
+        return $properties;
+    }
+    
+    /**
+     * Get detailed property information for a specific property ID
+     */
+    private function get_detailed_property_info($property_id) {
+        $params = $this->get_auth_params();
+        
+        try {
+            // Try different methods to get detailed property info
+            $methods_to_try = array(
+                array('method' => 'GetPropertyInfoById', 'param' => 'addressid'),
+                array('method' => 'GetPropertyAndOwnerById', 'param' => 'addressid')
+            );
+            
+            foreach ($methods_to_try as $method_config) {
+                try {
+                    $method_params = array_merge($params, array($method_config['param'] => $property_id));
+                    $response = $this->soap_client->{$method_config['method']}($method_params);
+                    
+                    $result_key = $method_config['method'] . 'Result';
+                    if (isset($response->$result_key->any)) {
+                        $xml_data = $response->$result_key->any;
+                        
+                        // Parse the XML to create a property object
+                        $property = $this->parse_single_property_xml($xml_data, $property_id);
+                        if ($property) {
+                            return $property;
+                        }
+                    }
+                    
+                } catch (Exception $e) {
+                    continue;
+                }
+            }
+            
+        } catch (Exception $e) {
+            error_log("Barefoot API: Error getting detailed property info for ID {$property_id}: " . $e->getMessage());
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Parse single property XML and create property object
+     */
+    private function parse_single_property_xml($xml_data, $property_id) {
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($xml_data);
+        
+        if ($xml !== false) {
+            $property = new stdClass();
+            $property->PropertyID = $property_id;
+            $property->Name = 'Property ' . $property_id; // Default name
+            
+            // Extract any available property information from the XML
+            foreach ($xml->children() as $key => $value) {
+                $property->$key = (string)$value;
+            }
+            
+            return $property;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Remove duplicate properties based on PropertyID
+     */
+    private function remove_duplicate_properties($properties) {
+        $unique_properties = array();
+        $seen_ids = array();
+        
+        foreach ($properties as $property) {
+            $id = $this->get_property_field($property, 'PropertyID');
+            if ($id && !in_array($id, $seen_ids)) {
+                $seen_ids[] = $id;
+                $unique_properties[] = $property;
+            }
+        }
+        
+        return $unique_properties;
     }
     
     /**
