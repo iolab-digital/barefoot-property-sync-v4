@@ -95,7 +95,7 @@ class Barefoot_API {
         return array(
             'username' => $this->username,
             'password' => $this->password,
-            'barefootAccount' => '' // Empty string required by API
+            'barefootAccount' => $this->version // Use the API version as the Barefoot account identifier
         );
     }
     
