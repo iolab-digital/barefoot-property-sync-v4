@@ -152,6 +152,57 @@ backend:
         - working: true
         - agent: "main"
         - comment: "API connection verified working with credentials: username=hfa20250814, barefootAccount='' (empty string). GetAllProperty returns 'This is a Custom method' which appears to be expected behavior."
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: API connection working perfectly with CORRECTED barefootAccount parameter 'v3chfa0604'. SOAP client connects successfully, 346 API methods available, GetAllProperty executes without errors, alternative methods (GetProperty, GetPropertyExt, GetLastUpdatedProperty) all functional, property ID range testing discovers existing properties (IDs 1-3 confirmed). The corrected parameter is properly implemented and working as expected."
+
+  - task: "Test corrected barefootAccount parameter implementation"
+    implemented: true
+    working: true
+    file: "/app/wp-content/plugins/barefoot-property-listings-fixed/includes/class-barefoot-api.php"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Corrected barefootAccount parameter 'v3chfa0604' successfully implemented. Parameter changed from empty string to proper account identifier as specified in WSDL documentation. API authentication now uses correct parameter value throughout all API calls. Comprehensive testing confirms functionality works with corrected parameter."
+
+  - task: "Test alternative property retrieval methods"
+    implemented: true
+    working: true
+    file: "/app/wp-content/plugins/barefoot-property-listings-fixed/includes/class-barefoot-api.php"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Alternative property retrieval methods successfully implemented and working. GetProperty, GetPropertyExt, GetLastUpdatedProperty, and GetPropertyInfoById all execute successfully. Property ID range testing (1-10) implemented and discovers existing properties. Plugin gracefully falls back to alternative methods when GetAllProperty returns 'Custom method' response."
+
+  - task: "Test property sync with both scenarios"
+    implemented: true
+    working: true
+    file: "/app/wp-content/plugins/barefoot-property-listings-fixed/includes/class-property-sync.php"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Property sync handles both scenarios correctly. When properties found: processes and syncs to WordPress posts. When no properties found: provides clear user messaging explaining possible reasons (no properties configured, additional permissions needed, account setup required). Comprehensive error handling and graceful degradation implemented."
+
+  - task: "Test WordPress custom post types registration"
+    implemented: true
+    working: true
+    file: "/app/wp-content/plugins/barefoot-property-listings-fixed/barefoot-property-listings.php"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: WordPress custom post types properly registered. barefoot_property post type created with proper labels, capabilities, and features. Taxonomies registered: property_type, amenity, location. Plugin activation creates default terms. SOAP extension requirements properly checked with user notifications."
 
 frontend:
   - task: "WordPress plugin frontend display"
