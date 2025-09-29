@@ -15,6 +15,7 @@ if (!defined('BAREFOOT_API_ENDPOINT')) {
     define('BAREFOOT_API_USERNAME', 'hfa20250814');
     define('BAREFOOT_API_PASSWORD', '#20250825@xcfvgrt!54687');
     define('BAREFOOT_API_VERSION', 'v3chfa0604');
+    define('BAREFOOT_VERSION', '1.0.0');
 }
 
 try {
