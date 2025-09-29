@@ -137,96 +137,114 @@ class Barefoot_API {
                     if (isset($response->$result_property)) {
                         $result = $response->$result_property;
                 
-                // Debug: Log the result structure
-                error_log('Barefoot GetAllPropertyResult: ' . print_r($result, true));
-                
-                // Handle different response formats
-                $properties = array();
-                
-                // Try multiple approaches to extract property data
-                if (isset($result->any) && is_string($result->any)) {
-                    // XML string format
-                    $xml_string = $result->any;
-                    error_log('Barefoot XML String: ' . substr($xml_string, 0, 1000) . '...');
-                    
-                    libxml_use_internal_errors(true);
-                    $xml = simplexml_load_string($xml_string);
-                    
-                    if ($xml !== false) {
-                        // Try different XPath patterns
-                        $property_nodes = $xml->xpath('//Property');
-                        if (empty($property_nodes)) {
-                            $property_nodes = $xml->xpath('//property');
-                        }
-                        if (empty($property_nodes)) {
-                            $property_nodes = $xml->xpath('//*[contains(name(), "Property")]');
-                        }
-                        if (empty($property_nodes)) {
-                            $property_nodes = $xml->xpath('//*');
+                        // Debug: Log the result structure
+                        error_log("Barefoot {$method}Result: " . print_r($result, true));
+                        
+                        // Skip if this is just a "custom method" message
+                        if (isset($result->Message) && strpos($result->Message, 'Custom method') !== false) {
+                            error_log("Method {$method} returned custom method message, trying next...");
+                            continue;
                         }
                         
-                        error_log('Found property nodes: ' . count($property_nodes));
+                        // Handle different response formats
+                        $properties = array();
                         
-                        foreach ($property_nodes as $property_xml) {
-                            $property = new stdClass();
+                        // Try multiple approaches to extract property data
+                        if (isset($result->any) && is_string($result->any)) {
+                            // XML string format
+                            $xml_string = $result->any;
+                            error_log('Barefoot XML String: ' . substr($xml_string, 0, 1000) . '...');
                             
-                            // Convert XML attributes to object properties
-                            foreach ($property_xml->attributes() as $key => $value) {
-                                $property->$key = (string)$value;
+                            libxml_use_internal_errors(true);
+                            $xml = simplexml_load_string($xml_string);
+                            
+                            if ($xml !== false) {
+                                // Try different XPath patterns
+                                $property_nodes = $xml->xpath('//Property');
+                                if (empty($property_nodes)) {
+                                    $property_nodes = $xml->xpath('//property');
+                                }
+                                if (empty($property_nodes)) {
+                                    $property_nodes = $xml->xpath('//*[contains(name(), "Property")]');
+                                }
+                                if (empty($property_nodes)) {
+                                    $property_nodes = $xml->xpath('//*');
+                                }
+                                
+                                error_log('Found property nodes: ' . count($property_nodes));
+                                
+                                foreach ($property_nodes as $property_xml) {
+                                    $property = new stdClass();
+                                    
+                                    // Convert XML attributes to object properties
+                                    foreach ($property_xml->attributes() as $key => $value) {
+                                        $property->$key = (string)$value;
+                                    }
+                                    
+                                    // Convert XML child elements to object properties
+                                    foreach ($property_xml->children() as $key => $value) {
+                                        $property->$key = (string)$value;
+                                    }
+                                    
+                                    // Debug: Log first property structure
+                                    if (count($properties) === 0) {
+                                        error_log('First property object: ' . print_r($property, true));
+                                    }
+                                    
+                                    $properties[] = $property;
+                                }
+                                
+                            } else {
+                                // XML parsing failed, log errors
+                                $xml_errors = libxml_get_errors();
+                                error_log('Barefoot XML Parse Error: ' . print_r($xml_errors, true));
                             }
                             
-                            // Convert XML child elements to object properties
-                            foreach ($property_xml->children() as $key => $value) {
-                                $property->$key = (string)$value;
-                            }
+                        } elseif (isset($result->schema) && isset($result->any)) {
+                            // DataSet format - try to extract from 'any' field
+                            error_log('Barefoot DataSet format detected');
                             
-                            // Debug: Log first property structure
-                            if (count($properties) === 0) {
-                                error_log('First property object: ' . print_r($property, true));
-                            }
+                        } elseif (is_object($result)) {
+                            // Direct object format
+                            error_log('Barefoot Direct object format detected');
                             
-                            $properties[] = $property;
+                            // Check if result itself contains property data
+                            if (isset($result->PropertyInfo)) {
+                                $prop_info = $result->PropertyInfo;
+                                if (is_array($prop_info)) {
+                                    $properties = $prop_info;
+                                } else {
+                                    $properties = array($prop_info);
+                                }
+                            }
+                        } elseif (is_array($result)) {
+                            // Array format
+                            error_log('Barefoot Array format detected');
+                            $properties = $result;
                         }
                         
-                    } else {
-                        // XML parsing failed, log errors
-                        $xml_errors = libxml_get_errors();
-                        error_log('Barefoot XML Parse Error: ' . print_r($xml_errors, true));
+                        error_log("Barefoot Final properties count for {$method}: " . count($properties));
+                        
+                        // If we got properties, return them
+                        if (count($properties) > 0) {
+                            return array(
+                                'success' => true,
+                                'data' => $properties,
+                                'count' => count($properties),
+                                'method_used' => $method
+                            );
+                        }
                     }
-                    
-                } elseif (isset($result->schema) && isset($result->any)) {
-                    // DataSet format - try to extract from 'any' field
-                    error_log('Barefoot DataSet format detected');
-                    
-                } elseif (is_object($result)) {
-                    // Direct object format
-                    error_log('Barefoot Direct object format detected');
-                    
-                    // Check if result itself contains property data
-                    if (isset($result->PropertyInfo)) {
-                        $prop_info = $result->PropertyInfo;
-                        if (is_array($prop_info)) {
-                            $properties = $prop_info;
-                        } else {
-                            $properties = array($prop_info);
-                        }
-                    }
-                } elseif (is_array($result)) {
-                    // Array format
-                    error_log('Barefoot Array format detected');
-                    $properties = $result;
+                } catch (SoapFault $e) {
+                    error_log("Method {$method} failed with SOAP Fault: " . $e->getMessage());
+                    continue;
+                } catch (Exception $e) {
+                    error_log("Method {$method} failed with error: " . $e->getMessage());
+                    continue;
                 }
-                
-                error_log('Barefoot Final properties count: ' . count($properties));
-                
-                return array(
-                    'success' => true,
-                    'data' => $properties,
-                    'count' => count($properties)
-                );
             }
             
-            return array('success' => false, 'message' => 'No GetAllPropertyResult in response');
+            return array('success' => false, 'message' => 'No valid property methods found or all methods returned empty results');
             
         } catch (SoapFault $e) {
             error_log('Barefoot GetAllProperty SOAP Fault: ' . $e->getMessage());
