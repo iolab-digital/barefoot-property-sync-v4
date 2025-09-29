@@ -26,6 +26,17 @@ try {
     echo "<p>Message: " . esc_html($connection['message']) . "</p>";
     
     if ($connection['success']) {
+        echo "<h2>1.5. Available Property Methods</h2>";
+        $property_methods = $api->list_property_methods();
+        if (!empty($property_methods)) {
+            echo "<ul>";
+            foreach ($property_methods as $method) {
+                echo "<li><code>" . esc_html($method) . "</code></li>";
+            }
+            echo "</ul>";
+        } else {
+            echo "<p>No property-related methods found.</p>";
+        }
         echo "<h2>2. Getting Properties</h2>";
         $properties = $api->get_all_properties();
         
