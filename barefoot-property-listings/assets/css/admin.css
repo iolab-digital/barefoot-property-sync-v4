@@ -1,0 +1,607 @@
+/**
+ * Barefoot Properties Admin Styles
+ * 
+ * @package BarefootPropertyListings
+ * @since 1.1.0
+ */
+
+/* ==========================================================================
+   Admin Dashboard
+   ========================================================================== */
+
+.barefoot-admin-dashboard {
+    margin: 20px 0;
+}
+
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard-widget {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-widget h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dashboard-widget ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dashboard-widget li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-widget li:last-child {
+    border-bottom: none;
+}
+
+.dashboard-widget a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.dashboard-widget a:hover {
+    color: #005177;
+}
+
+.dashboard-widget small {
+    color: #646970;
+    font-size: 12px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.quick-actions .button {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* API Status */
+.api-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.api-status.success {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.api-status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-indicator {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.api-status.success .status-indicator {
+    color: #198754;
+}
+
+.api-status.error .status-indicator {
+    color: #dc3545;
+}
+
+.api-status p {
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   Sync Page
+   ========================================================================== */
+
+.barefoot-sync-container {
+    max-width: 800px;
+}
+
+.sync-controls {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.sync-controls .button {
+    min-width: 150px;
+}
+
+.sync-progress {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0073aa, #005177);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    text-align: center;
+    color: #646970;
+    margin: 0;
+}
+
+.sync-results {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.sync-results h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.results-content {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #0073aa;
+}
+
+.results-content.success {
+    background: #d1e7dd;
+    border-left-color: #198754;
+    color: #0f5132;
+}
+
+.results-content.error {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+
+.sync-log {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.sync-log h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.sync-log table {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.sync-log .success {
+    color: #198754;
+    font-weight: bold;
+}
+
+.sync-log .error {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   Settings Page
+   ========================================================================== */
+
+.barefoot-settings-info {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-top: 30px;
+}
+
+.barefoot-settings-info h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.barefoot-settings-info .form-table th {
+    width: 200px;
+    padding: 10px 0;
+    vertical-align: top;
+}
+
+.barefoot-settings-info .form-table td {
+    padding: 10px 0;
+}
+
+.barefoot-settings-info code {
+    background: #f1f1f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, monospace;
+}
+
+.barefoot-settings-info .description {
+    margin-top: 15px;
+    font-style: italic;
+    color: #646970;
+}
+
+/* ==========================================================================
+   Test Page
+   ========================================================================== */
+
+.barefoot-test-container {
+    max-width: 800px;
+}
+
+.test-controls {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.test-results {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.test-results h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.results-output {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #e1e1e1;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.results-output.success {
+    background: #d1e7dd;
+    border-color: #badbcc;
+    color: #0f5132;
+}
+
+.results-output.error {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* ==========================================================================
+   Property Edit Page
+   ========================================================================== */
+
+.barefoot-property-meta {
+    background: #fff;
+    padding: 0;
+}
+
+.barefoot-property-meta .form-table th {
+    width: 150px;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+}
+
+.barefoot-property-meta .form-table td {
+    padding: 15px 0;
+}
+
+.barefoot-property-meta .form-table input[type="text"],
+.barefoot-property-meta .form-table input[type="number"],
+.barefoot-property-meta .form-table input[type="email"],
+.barefoot-property-meta .form-table select,
+.barefoot-property-meta .form-table textarea {
+    width: 100%;
+    max-width: 400px;
+}
+
+.barefoot-property-meta .form-table input[readonly] {
+    background: #f9f9f9;
+    color: #646970;
+}
+
+.barefoot-property-meta .description {
+    color: #646970;
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.barefoot-property-meta code {
+    background: #f1f1f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+}
+
+/* ==========================================================================
+   Property List Table
+   ========================================================================== */
+
+.wp-list-table .column-property_id {
+    width: 80px;
+}
+
+.wp-list-table .column-occupancy {
+    width: 80px;
+}
+
+.wp-list-table .column-location {
+    width: 150px;
+}
+
+.wp-list-table .column-price_range {
+    width: 120px;
+}
+
+.wp-list-table .column-last_sync {
+    width: 100px;
+}
+
+.wp-list-table .column-last_sync small {
+    color: #646970;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+    
+    .sync-controls,
+    .test-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .sync-controls .button,
+    .test-controls .button {
+        min-width: auto;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .button {
+        min-width: auto;
+    }
+    
+    .barefoot-property-meta .form-table th,
+    .barefoot-property-meta .form-table td {
+        display: block;
+        width: auto;
+        padding: 10px 0;
+    }
+    
+    .barefoot-property-meta .form-table th {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+.barefoot-admin .notice {
+    margin: 15px 0;
+}
+
+.barefoot-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.barefoot-success-message {
+    color: #198754;
+    font-weight: 500;
+}
+
+.barefoot-error-message {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.barefoot-info-message {
+    color: #0073aa;
+    font-weight: 500;
+}
+
+.barefoot-hidden {
+    display: none !important;
+}
+
+.barefoot-highlight {
+    background: #ffeb3b;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+/* Property Type Icons */
+.property-type-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Tabs */
+.barefoot-tabs {
+    border-bottom: 1px solid #c3c4c7;
+    margin-bottom: 20px;
+}
+
+.barefoot-tabs ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+}
+
+.barefoot-tabs li {
+    margin-right: 20px;
+}
+
+.barefoot-tabs a {
+    display: block;
+    padding: 10px 15px;
+    color: #646970;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.barefoot-tabs a:hover,
+.barefoot-tabs a.active {
+    color: #0073aa;
+    border-bottom-color: #0073aa;
+}
+
+/* Help Text */
+.barefoot-help {
+    background: #f0f6fc;
+    border: 1px solid #c5d2e0;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.barefoot-help h4 {
+    margin-top: 0;
+    color: #0969da;
+}
+
+.barefoot-help p:last-child {
+    margin-bottom: 0;
+}
+
+/* Code blocks */
+.barefoot-code {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 15px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.barefoot-code pre {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: inherit;
+}
