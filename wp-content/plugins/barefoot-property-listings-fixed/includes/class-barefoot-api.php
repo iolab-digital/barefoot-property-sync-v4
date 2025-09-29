@@ -403,6 +403,22 @@ class Barefoot_API {
     }
     
     /**
+     * List all available property-related methods
+     */
+    public function list_property_methods() {
+        $functions = $this->get_available_functions();
+        $property_methods = array();
+        
+        foreach ($functions as $function) {
+            if (stripos($function, 'property') !== false || stripos($function, 'Property') !== false) {
+                $property_methods[] = $function;
+            }
+        }
+        
+        return $property_methods;
+    }
+    
+    /**
      * Get SOAP types for debugging
      */
     public function get_available_types() {
