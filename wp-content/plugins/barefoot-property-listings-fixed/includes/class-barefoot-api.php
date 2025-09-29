@@ -149,8 +149,22 @@ class Barefoot_API {
                         // Handle different response formats
                         $properties = array();
                         
-                        // Try multiple approaches to extract property data
-                        if (isset($result->any) && is_string($result->any)) {
+                        // Check for the PROPERTIES container first (according to WSDL)
+                        if (isset($result->PROPERTIES) && isset($result->PROPERTIES->PROPERTY)) {
+                            error_log('Found PROPERTIES->PROPERTY structure');
+                            
+                            $property_data = $result->PROPERTIES->PROPERTY;
+                            
+                            // Handle single property vs multiple properties
+                            if (is_array($property_data)) {
+                                $properties = $property_data;
+                            } else {
+                                $properties = array($property_data);
+                            }
+                            
+                            error_log('Extracted ' . count($properties) . ' properties from PROPERTIES structure');
+                            
+                        } elseif (isset($result->any) && is_string($result->any)) {
                             // XML string format
                             $xml_string = $result->any;
                             error_log('Barefoot XML String: ' . substr($xml_string, 0, 1000) . '...');
