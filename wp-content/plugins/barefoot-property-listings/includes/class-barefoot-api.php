@@ -108,9 +108,7 @@ class Barefoot_API {
         }
         
         try {
-            $params = array_merge($this->get_auth_params(), array(
-                'includeInactive' => false
-            ));
+            $params = $this->get_auth_params();
             
             $response = $this->soap_client->GetAllProperty($params);
             
