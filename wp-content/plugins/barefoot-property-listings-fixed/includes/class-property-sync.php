@@ -66,15 +66,46 @@ class Barefoot_Property_Sync {
      */
     public function sync_single_property($property_data) {
         try {
+            // Debug: Log the property data structure
+            error_log('Syncing property data: ' . print_r($property_data, true));
+            
             // Extract property information
             $property_id = $this->get_property_field($property_data, 'PropertyId');
             $property_name = $this->get_property_field($property_data, 'PropertyName');
             $property_description = $this->get_property_field($property_data, 'Description');
             
+            // Debug: Log extracted values
+            error_log("Extracted values - ID: {$property_id}, Name: {$property_name}");
+            
+            // Try alternative field names if primary ones don't work
+            if (empty($property_id)) {
+                $property_id = $this->get_property_field($property_data, 'ID') ?: 
+                              $this->get_property_field($property_data, 'id') ?: 
+                              $this->get_property_field($property_data, 'PropertyID');
+            }
+            
+            if (empty($property_name)) {
+                $property_name = $this->get_property_field($property_data, 'Name') ?: 
+                                $this->get_property_field($property_data, 'Title') ?: 
+                                $this->get_property_field($property_data, 'PropertyTitle');
+            }
+            
+            error_log("After alternative fields - ID: {$property_id}, Name: {$property_name}");
+            
             if (empty($property_id) || empty($property_name)) {
+                // List all available fields for debugging
+                $available_fields = array();
+                if (is_object($property_data)) {
+                    $available_fields = get_object_vars($property_data);
+                } elseif (is_array($property_data)) {
+                    $available_fields = array_keys($property_data);
+                }
+                
+                error_log('Available property fields: ' . implode(', ', $available_fields));
+                
                 return array(
                     'success' => false,
-                    'message' => 'Missing required property data (ID or Name)'
+                    'message' => 'Missing required property data (ID or Name). Available fields: ' . implode(', ', $available_fields)
                 );
             }
             
