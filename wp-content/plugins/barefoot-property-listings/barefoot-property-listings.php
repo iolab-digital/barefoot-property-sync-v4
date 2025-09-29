@@ -279,7 +279,7 @@ class BarefootPropertyListings {
                             logContainer.append('<div>✓ Sync completed successfully!</div>');
                             logContainer.append('<div>Properties synced: ' + response.data.count + '</div>');
                         } else {
-                            logContainer.append('<div style="color: red;">✗ Sync failed: ' + response.data.message + '</div>');
+                            logContainer.append('<div style=\"color: red;\">✗ Sync failed: ' + response.data.message + '</div>');
                         }
                     },
                     error: function() {
