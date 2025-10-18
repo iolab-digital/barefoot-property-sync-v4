@@ -15,7 +15,7 @@ class BarefootAPI:
     """Wrapper for Barefoot Property Management SOAP API"""
     
     def __init__(self):
-        self.endpoint = 'https://apps.barefoottech.com/barefoot/wapi.asmx'
+        self.endpoint = 'https://portals.barefoot.com/BarefootWebService/BarefootService.asmx'
         self.wsdl = f'{self.endpoint}?WSDL'
         self.username = 'hfa20250814'
         self.password = '#20250825@xcfvgrt!54687'
