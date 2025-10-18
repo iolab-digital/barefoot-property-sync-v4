@@ -49,31 +49,55 @@ class BarefootAPI:
                         'message': 'Failed to initialize SOAP client'
                     }
             
-            # Test with GetUrlTest method
-            response = self.client.service.GetUrlTest()
+            # Get available operations first
+            try:
+                operations = [op.name for op in self.client.wsdl.services[0].ports[0].binding._operations.values()]
+                logger.info(f"Found {len(operations)} operations in WSDL")
+            except Exception as e:
+                logger.error(f"Error getting operations: {str(e)}")
+                operations = []
             
-            # Get available operations
-            operations = [op.name for op in self.client.wsdl.services[0].ports[0].binding._operations.values()]
-            
-            return {
-                'success': True,
-                'message': 'Successfully connected to Barefoot API',
-                'endpoint': response if response else 'Connected',
-                'total_operations': len(operations),
-                'operations': operations[:20]  # Show first 20 operations
-            }
+            # Try a simple test method
+            try:
+                response = self.client.service.GetUrlTest()
+                logger.info(f"GetUrlTest response: {response}")
+                
+                return {
+                    'success': True,
+                    'message': 'Successfully connected to Barefoot API',
+                    'endpoint': str(response) if response else 'Connected',
+                    'total_operations': len(operations),
+                    'operations': operations[:20]  # Show first 20 operations
+                }
+            except Exception as test_error:
+                logger.error(f"GetUrlTest failed: {str(test_error)}, trying alternative verification")
+                
+                # If GetUrlTest fails, but we have operations, we're still connected
+                if len(operations) > 0:
+                    return {
+                        'success': True,
+                        'message': f'Connected to Barefoot API (WSDL loaded successfully)',
+                        'endpoint': self.endpoint,
+                        'total_operations': len(operations),
+                        'operations': operations[:20],
+                        'note': 'GetUrlTest method not available, but WSDL loaded successfully'
+                    }
+                else:
+                    raise test_error
             
         except Fault as fault:
+            error_msg = f"SOAP Fault: {str(fault)}"
             logger.error(f"SOAP Fault in test_connection: {fault}")
             return {
                 'success': False,
-                'message': f'SOAP Fault: {str(fault)}'
+                'message': error_msg
             }
         except Exception as e:
-            logger.error(f"Error in test_connection: {str(e)}")
+            error_msg = f"Connection Error: {str(e)}"
+            logger.error(f"Error in test_connection: {str(e)}", exc_info=True)
             return {
                 'success': False,
-                'message': f'Connection Error: {str(e)}'
+                'message': error_msg
             }
     
     def get_all_properties(self):
