@@ -99,6 +99,51 @@ async def get_barefoot_property(property_id: int):
         logger.error(f"Error getting property {property_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/barefoot/debug-info")
+async def get_debug_info():
+    """Get debug information about SOAP client"""
+    try:
+        if not barefoot_api.client:
+            barefoot_api._init_client()
+        
+        info = {
+            'client_initialized': barefoot_api.client is not None,
+            'endpoint': barefoot_api.endpoint,
+            'wsdl_url': barefoot_api.wsdl
+        }
+        
+        if barefoot_api.client:
+            try:
+                # Try to get service info
+                services = barefoot_api.client.wsdl.services
+                info['services_count'] = len(services)
+                
+                if services:
+                    service = services[0]
+                    info['service_name'] = service.name
+                    info['ports_count'] = len(service.ports)
+                    
+                    if service.ports:
+                        port = service.ports[0]
+                        info['port_name'] = port.name
+                        # Try to get operations safely
+                        try:
+                            operations = list(port.binding._operations.keys())
+                            info['operations'] = operations[:50]  # First 50
+                            info['total_operations'] = len(operations)
+                        except Exception as op_error:
+                            info['operations_error'] = str(op_error)
+            except Exception as e:
+                info['wsdl_parse_error'] = str(e)
+        
+        return info
+    except Exception as e:
+        logger.error(f"Error in debug_info: {str(e)}", exc_info=True)
+        return {
+            'error': str(e),
+            'client_initialized': False
+        }
+
 @api_router.get("/barefoot/available-methods")
 async def get_available_methods():
     """Get all available SOAP methods"""
