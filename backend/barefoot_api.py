@@ -308,38 +308,51 @@ class BarefootAPI:
             logger.error(f"Error parsing property XML: {str(e)}")
             return None
     
-    def _parse_xml_response(self, xml_str):
-        """Parse XML response to extract property list"""
+    def _parse_property_list_xml(self, xml_str):
+        """Parse PropertyList XML response from GetProperty"""
         try:
+            logger.info("Parsing PropertyList XML...")
+            
+            # Remove the outer string tag if present
+            if '<string' in xml_str and '</string>' in xml_str:
+                start = xml_str.find('<PropertyList>')
+                end = xml_str.find('</PropertyList>') + len('</PropertyList>')
+                if start != -1 and end > start:
+                    xml_str = xml_str[start:end]
+            
             root = ET.fromstring(xml_str)
             properties = []
             
-            # Try different XPath patterns to find properties
-            property_elements = root.findall('.//*[contains(local-name(), "Property")]')
+            # Find all Property elements
+            property_elements = root.findall('.//Property')
             
-            if not property_elements:
-                property_elements = [root]  # Maybe the root itself is the property
+            logger.info(f"Found {len(property_elements)} Property elements")
             
             for prop_elem in property_elements:
                 prop_data = {}
                 
-                # Get attributes
-                for attr_name, attr_value in prop_elem.attrib.items():
-                    prop_data[attr_name] = attr_value
-                
-                # Get child elements
+                # Get all child elements
                 for child in prop_elem:
-                    tag = child.tag.split('}')[-1]  # Remove namespace
-                    prop_data[tag] = child.text if child.text else ''
+                    tag = child.tag.split('}')[-1]  # Remove namespace if present
+                    text = child.text
+                    # Store the value
+                    prop_data[tag] = text.strip() if text else ''
                 
-                if prop_data:
+                # Only add if we have actual data
+                if prop_data and 'PropertyID' in prop_data:
                     properties.append(prop_data)
+                    logger.debug(f"Parsed property: {prop_data.get('name', prop_data.get('PropertyID'))}")
             
+            logger.info(f"Successfully parsed {len(properties)} properties")
             return properties
             
         except Exception as e:
-            logger.error(f"Error parsing XML response: {str(e)}")
+            logger.error(f"Error parsing PropertyList XML: {str(e)}", exc_info=True)
             return []
+    
+    def _parse_xml_response(self, xml_str):
+        """Legacy parse method - redirects to new parser"""
+        return self._parse_property_list_xml(xml_str)
 
 # Create a singleton instance
 barefoot_api = BarefootAPI()
