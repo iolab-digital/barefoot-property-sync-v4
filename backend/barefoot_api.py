@@ -160,51 +160,23 @@ class BarefootAPI:
                 logger.error(error_msg, exc_info=True)
                 results['errors'].append(error_msg)
             
-            # Method 2: Try GetProperty without parameters
-            if not results['success']:
-                try:
-                    logger.info("Attempting GetProperty without ID...")
-                    response = self.client.service.GetProperty(**auth_params)
-                    results['methods_tried'].append('GetProperty (no ID)')
-                    
-                    if response and hasattr(response, 'any'):
-                        properties = self._parse_xml_response(response.any)
-                        if properties:
-                            results['properties'].extend(properties)
-                            results['success'] = True
-                            results['method_used'] = 'GetProperty (no ID)'
-                            
-                except Exception as e:
-                    error_msg = f"GetProperty error: {str(e)}"
-                    logger.error(error_msg)
-                    results['errors'].append(error_msg)
-            
-            # Method 3: Try individual property IDs
-            if not results['success']:
-                logger.info("Attempting individual property retrieval by ID...")
-                properties_found = self._get_properties_by_id(auth_params)
-                if properties_found:
-                    results['properties'] = properties_found
-                    results['success'] = True
-                    results['method_used'] = 'GetProperty by ID range'
-                    results['methods_tried'].append('GetProperty by ID (1-20)')
-            
             # Add summary
             results['count'] = len(results['properties'])
             if results['success']:
-                results['message'] = f"Successfully retrieved {results['count']} properties"
+                results['message'] = f"Successfully retrieved {results['count']} properties using {results['method_used']}"
             else:
-                results['message'] = 'Failed to retrieve properties using all available methods'
+                results['message'] = f"Failed to retrieve properties. Errors: {'; '.join(results['errors'])}"
             
             return results
             
         except Exception as e:
-            logger.error(f"Critical error in get_all_properties: {str(e)}")
+            logger.error(f"Critical error in get_all_properties: {str(e)}", exc_info=True)
             return {
                 'success': False,
                 'message': f'Critical Error: {str(e)}',
                 'properties': [],
-                'count': 0
+                'count': 0,
+                'errors': [str(e)]
             }
     
     def _get_properties_by_id(self, auth_params, max_id=20):
