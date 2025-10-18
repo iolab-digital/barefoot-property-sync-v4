@@ -201,6 +201,67 @@ class Barefoot_Admin_Page {
                     <h3><?php _e('Sync History', 'barefoot-properties'); ?></h3>
                     <?php $this->render_sync_history(); ?>
                 </div>
+                
+                <!-- Debug Information -->
+                <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px;">
+                    <h4>Debug Information</h4>
+                    <p><strong>Plugin Version:</strong> <?php echo BAREFOOT_VERSION; ?></p>
+                    <p><strong>Admin JS Enqueued:</strong> <?php echo wp_script_is('barefoot-admin', 'enqueued') ? 'Yes ✅' : 'No ❌'; ?></p>
+                    <p><strong>Admin CSS Enqueued:</strong> <?php echo wp_style_is('barefoot-admin', 'enqueued') ? 'Yes ✅' : 'No ❌'; ?></p>
+                    <p><strong>AJAX URL:</strong> <?php echo admin_url('admin-ajax.php'); ?></p>
+                    <p><strong>Current Hook:</strong> <?php global $hook_suffix; echo $hook_suffix; ?></p>
+                    <p><strong>JavaScript Console:</strong> Check browser console (F12) for any errors</p>
+                </div>
+                
+                <script type="text/javascript">
+                console.log('=== BAREFOOT SYNC PAGE DEBUG ===');
+                console.log('Page loaded at:', new Date());
+                console.log('jQuery available:', typeof jQuery !== 'undefined');
+                console.log('$ available:', typeof $ !== 'undefined');
+                console.log('ajaxurl available:', typeof ajaxurl !== 'undefined');
+                console.log('barefoot_ajax available:', typeof barefoot_ajax !== 'undefined');
+                
+                if (typeof barefoot_ajax !== 'undefined') {
+                    console.log('barefoot_ajax contents:', barefoot_ajax);
+                } else {
+                    console.error('❌ barefoot_ajax is NOT DEFINED - This is the problem!');
+                    console.log('This means the JavaScript localization failed.');
+                }
+                
+                jQuery(document).ready(function($) {
+                    console.log('Document ready fired');
+                    console.log('Sync button found:', $('#sync-all-properties').length);
+                    console.log('Test connection button found:', $('#test-api-connection').length);
+                    
+                    // Manual click handler for debugging
+                    $('#test-api-connection').on('click', function(e) {
+                        e.preventDefault();
+                        console.log('❗ TEST CONNECTION CLICKED');
+                        
+                        if (typeof barefoot_ajax === 'undefined') {
+                            alert('❌ ERROR: barefoot_ajax is not defined!\n\nThis means the JavaScript/AJAX setup is not working.\n\nPlease check:\n1. Plugin is activated\n2. No JavaScript errors in console\n3. WordPress is loading admin scripts properly');
+                            return;
+                        }
+                        
+                        alert('✅ JavaScript is working!\n\nNow testing AJAX connection...');
+                        
+                        var ajaxUrl = (typeof ajaxurl !== 'undefined') ? ajaxurl : barefoot_ajax.ajax_url;
+                        
+                        $.post(ajaxUrl, {
+                            action: 'barefoot_test_connection',
+                            nonce: barefoot_ajax.nonce
+                        })
+                        .done(function(response) {
+                            console.log('✅ AJAX Success:', response);
+                            alert('✅ AJAX Connection Test Successful!\n\nResponse: ' + JSON.stringify(response));
+                        })
+                        .fail(function(xhr, status, error) {
+                            console.error('❌ AJAX Failed:', {status: status, error: error, response: xhr.responseText});
+                            alert('❌ AJAX Connection Test Failed!\n\nStatus: ' + status + '\nError: ' + error + '\n\nCheck console for details.');
+                        });
+                    });
+                });
+                </script>
             </div>
         </div>
         <?php
