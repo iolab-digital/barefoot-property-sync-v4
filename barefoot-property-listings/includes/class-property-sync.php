@@ -492,13 +492,39 @@ class Barefoot_Property_Sync {
     }
     
     /**
-     * Get field value from property data (handles different object structures)
+     * Get field value from property data (handles different object structures and new GetProperty method)
      */
     private function get_property_field($property_data, $field_name) {
         if (is_array($property_data)) {
             return isset($property_data[$field_name]) ? $property_data[$field_name] : null;
         } elseif (is_object($property_data)) {
-            return isset($property_data->$field_name) ? $property_data->$field_name : null;
+            // Check direct property first
+            if (isset($property_data->$field_name)) {
+                return $property_data->$field_name;
+            }
+            
+            // Check alternative field names based on GetProperty method structure
+            $alternative_fields = array(
+                'PropertyID' => array('PropertyID', 'PropertyId', 'ID', 'id', 'PropertyNumber'),
+                'Name' => array('Name', 'PropertyName', 'PropertyTitle', 'Title'),
+                'Description' => array('Description', 'PropertyDescription', 'Desc', 'LongDescription'),
+                'City' => array('City', 'PropertyCity', 'CityName'),
+                'State' => array('State', 'PropertyState', 'StateCode'),
+                'Zip' => array('Zip', 'ZipCode', 'PostalCode'),
+                'Occupancy' => array('Occupancy', 'MaxOccupancy', 'Sleeps', 'GuestCapacity'),
+                'Bedrooms' => array('Bedrooms', 'BedroomCount', 'Beds', 'NumBedrooms'),
+                'Bathrooms' => array('Bathrooms', 'BathroomCount', 'Baths', 'NumBathrooms'),
+                'Minprice' => array('Minprice', 'MinPrice', 'MinimumRate', 'LowRate'),
+                'Maxprice' => array('Maxprice', 'MaxPrice', 'MaximumRate', 'HighRate')
+            );
+            
+            if (isset($alternative_fields[$field_name])) {
+                foreach ($alternative_fields[$field_name] as $alt_field) {
+                    if (isset($property_data->$alt_field)) {
+                        return $property_data->$alt_field;
+                    }
+                }
+            }
         }
         
         return null;
