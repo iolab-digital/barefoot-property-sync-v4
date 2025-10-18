@@ -281,6 +281,69 @@ class Barefoot_Admin_Page {
                     </div>
                 </div>
             </div>
+            
+            <!-- Debug Information -->
+            <div style="margin-top: 30px; padding: 15px; background: #f0f0f0; border: 1px solid #ccc;">
+                <h3>Debug Information</h3>
+                <p><strong>Plugin Version:</strong> <?php echo BAREFOOT_VERSION; ?></p>
+                <p><strong>Admin JS Enqueued:</strong> <?php echo wp_script_is('barefoot-admin', 'enqueued') ? 'Yes' : 'No'; ?></p>
+                <p><strong>AJAX URL:</strong> <?php echo admin_url('admin-ajax.php'); ?></p>
+                <p><strong>Nonce:</strong> <?php echo wp_create_nonce('barefoot_nonce'); ?></p>
+                <p><strong>Current Hook:</strong> <?php global $hook_suffix; echo $hook_suffix; ?></p>
+            </div>
+            
+            <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                console.log('=== BAREFOOT TEST PAGE DEBUG ===');
+                console.log('jQuery available:', typeof $ !== 'undefined');
+                console.log('ajaxurl available:', typeof ajaxurl !== 'undefined');
+                console.log('barefoot_ajax available:', typeof barefoot_ajax !== 'undefined');
+                
+                if (typeof barefoot_ajax !== 'undefined') {
+                    console.log('barefoot_ajax object:', barefoot_ajax);
+                } else {
+                    console.warn('barefoot_ajax is not defined - this could be the problem!');
+                }
+                
+                // Test if buttons exist
+                console.log('Test connection button exists:', $('#test-connection').length > 0);
+                console.log('Test get properties button exists:', $('#test-get-properties').length > 0);
+                
+                // Add a manual click test
+                $('#test-connection').on('click', function(e) {
+                    e.preventDefault();
+                    console.log('Manual click handler triggered');
+                    
+                    if (typeof barefoot_ajax === 'undefined') {
+                        alert('barefoot_ajax is not defined! JavaScript not loaded properly.');
+                        return;
+                    }
+                    
+                    if (typeof ajaxurl === 'undefined' && !barefoot_ajax.ajax_url) {
+                        alert('No AJAX URL available!');
+                        return;
+                    }
+                    
+                    var ajaxUrl = (typeof ajaxurl !== 'undefined') ? ajaxurl : barefoot_ajax.ajax_url;
+                    
+                    console.log('Making AJAX call to:', ajaxUrl);
+                    
+                    $.post(ajaxUrl, {
+                        action: 'barefoot_test_connection',
+                        nonce: barefoot_ajax.nonce
+                    })
+                    .done(function(response) {
+                        console.log('Manual test response:', response);
+                        $('.results-output').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.error('Manual test failed:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        $('.results-output').html('<div style="color: red;">AJAX Failed: ' + error + '<br>Status: ' + status + '<br>Response: ' + xhr.responseText + '</div>');
+                    });
+                });
+            });
+            </script>
         </div>
         <?php
     }
