@@ -101,7 +101,7 @@ class BarefootAPI:
             }
     
     def get_all_properties(self):
-        """Attempt to retrieve all properties using various methods"""
+        """Attempt to retrieve all properties using GetProperty method"""
         try:
             if not self.client:
                 if not self._init_client():
@@ -123,33 +123,41 @@ class BarefootAPI:
                 'errors': []
             }
             
-            # Method 1: Try GetAllProperty
+            # Method 1: Try GetProperty (the correct method based on API documentation)
             try:
-                logger.info("Attempting GetAllProperty...")
-                response = self.client.service.GetAllProperty(**auth_params)
-                results['methods_tried'].append('GetAllProperty')
+                logger.info("Attempting GetProperty with auth credentials only...")
+                response = self.client.service.GetProperty(**auth_params)
+                results['methods_tried'].append('GetProperty')
                 
                 if response:
-                    logger.info(f"GetAllProperty response type: {type(response)}")
-                    logger.info(f"GetAllProperty response: {response}")
+                    logger.info(f"GetProperty response type: {type(response)}")
+                    logger.info(f"GetProperty raw response: {str(response)[:500]}...")
                     
-                    # Try to parse the response
-                    if hasattr(response, 'any'):
-                        properties = self._parse_xml_response(response.any)
+                    # The response should be a string containing XML
+                    if isinstance(response, str):
+                        logger.info("Response is string, parsing XML directly...")
+                        properties = self._parse_property_list_xml(response)
                         if properties:
                             results['properties'].extend(properties)
                             results['success'] = True
-                            results['method_used'] = 'GetAllProperty'
+                            results['method_used'] = 'GetProperty'
+                    elif hasattr(response, 'any'):
+                        logger.info("Response has 'any' attribute, parsing...")
+                        properties = self._parse_property_list_xml(response.any)
+                        if properties:
+                            results['properties'].extend(properties)
+                            results['success'] = True
+                            results['method_used'] = 'GetProperty'
                     else:
-                        results['errors'].append(f"GetAllProperty returned: {str(response)}")
+                        results['errors'].append(f"GetProperty returned unexpected format: {str(response)[:200]}")
                         
             except Fault as fault:
-                error_msg = f"GetAllProperty SOAP Fault: {str(fault)}"
+                error_msg = f"GetProperty SOAP Fault: {str(fault)}"
                 logger.error(error_msg)
                 results['errors'].append(error_msg)
             except Exception as e:
-                error_msg = f"GetAllProperty error: {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"GetProperty error: {str(e)}"
+                logger.error(error_msg, exc_info=True)
                 results['errors'].append(error_msg)
             
             # Method 2: Try GetProperty without parameters
