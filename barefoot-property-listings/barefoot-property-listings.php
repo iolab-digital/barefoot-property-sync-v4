@@ -26,10 +26,19 @@ define('BAREFOOT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BAREFOOT_VERSION', '1.1.0');
 
 // Barefoot API Configuration
-define('BAREFOOT_API_ENDPOINT', 'https://portals.barefoot.com/BarefootWebService/BarefootService.asmx');
-define('BAREFOOT_API_USERNAME', 'hfa20250814');
-define('BAREFOOT_API_PASSWORD', '#20250825@xcfvgrt!54687');
-define('BAREFOOT_API_ACCOUNT', 'v3chfa0604'); // Corrected: Account identifier, not version
+// These can be overridden in wp-config.php for security
+if (!defined('BAREFOOT_API_ENDPOINT')) {
+    define('BAREFOOT_API_ENDPOINT', 'https://portals.barefoot.com/BarefootWebService/BarefootService.asmx');
+}
+if (!defined('BAREFOOT_API_USERNAME')) {
+    define('BAREFOOT_API_USERNAME', get_option('barefoot_api_username', ''));
+}
+if (!defined('BAREFOOT_API_PASSWORD')) {
+    define('BAREFOOT_API_PASSWORD', get_option('barefoot_api_password', ''));
+}
+if (!defined('BAREFOOT_API_ACCOUNT')) {
+    define('BAREFOOT_API_ACCOUNT', get_option('barefoot_api_account', ''));
+}
 
 /**
  * Main plugin class
