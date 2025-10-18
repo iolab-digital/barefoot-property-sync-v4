@@ -53,6 +53,52 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Barefoot API endpoints
+@api_router.get("/barefoot/test-connection")
+async def test_barefoot_connection():
+    """Test connection to Barefoot SOAP API"""
+    try:
+        result = barefoot_api.test_connection()
+        return result
+    except Exception as e:
+        logger.error(f"Error testing Barefoot connection: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/barefoot/properties")
+async def get_barefoot_properties():
+    """Retrieve properties from Barefoot API"""
+    try:
+        result = barefoot_api.get_all_properties()
+        return result
+    except Exception as e:
+        logger.error(f"Error getting Barefoot properties: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/barefoot/properties/{property_id}")
+async def get_barefoot_property(property_id: int):
+    """Get details for a specific property"""
+    try:
+        auth_params = {
+            'username': barefoot_api.username,
+            'password': barefoot_api.password,
+            'barefootAccount': barefoot_api.barefoot_account
+        }
+        property_data = barefoot_api._get_property_details(property_id, auth_params)
+        
+        if property_data:
+            return {
+                'success': True,
+                'property': property_data
+            }
+        else:
+            return {
+                'success': False,
+                'message': f'Property {property_id} not found or unable to retrieve details'
+            }
+    except Exception as e:
+        logger.error(f"Error getting property {property_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
