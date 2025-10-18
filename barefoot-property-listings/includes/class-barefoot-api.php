@@ -444,6 +444,60 @@ class Barefoot_API {
     /**
      * Parse XML properties from API response
      */
+    /**
+     * Parse PropertyList XML format returned by GetProperty method
+     * Handles the <PropertyList><Property>...</Property></PropertyList> structure
+     */
+    private function parse_property_list_xml($xml_string) {
+        $properties = array();
+        
+        libxml_use_internal_errors(true);
+        
+        // Remove outer <string> wrapper if present
+        if (strpos($xml_string, '<string') !== false && strpos($xml_string, '</string>') !== false) {
+            $start = strpos($xml_string, '<PropertyList>');
+            $end = strpos($xml_string, '</PropertyList>') + strlen('</PropertyList>');
+            if ($start !== false && $end > $start) {
+                $xml_string = substr($xml_string, $start, $end - $start);
+            }
+        }
+        
+        $xml = simplexml_load_string($xml_string);
+        
+        if ($xml !== false) {
+            // Find all Property elements within PropertyList
+            $property_nodes = $xml->xpath('//Property');
+            
+            if (!empty($property_nodes)) {
+                error_log('Barefoot API: Found ' . count($property_nodes) . ' Property elements in XML');
+                
+                foreach ($property_nodes as $property_xml) {
+                    $property = array();
+                    
+                    // Convert all child elements to array
+                    foreach ($property_xml->children() as $key => $value) {
+                        $property[$key] = (string)$value;
+                    }
+                    
+                    // Only add if we have PropertyID (indicates valid property data)
+                    if (isset($property['PropertyID']) && !empty($property['PropertyID'])) {
+                        $properties[] = (object)$property; // Convert to object for consistency
+                    }
+                }
+                
+                error_log('Barefoot API: Successfully parsed ' . count($properties) . ' properties from PropertyList');
+            } else {
+                error_log('Barefoot API: No Property elements found in XML');
+            }
+        } else {
+            $errors = libxml_get_errors();
+            error_log('Barefoot API: XML parsing failed: ' . print_r($errors, true));
+            libxml_clear_errors();
+        }
+        
+        return $properties;
+    }
+    
     private function parse_xml_properties($xml_string) {
         $properties = array();
         
