@@ -215,6 +215,7 @@ class BarefootPropertyListings {
             
             wp_localize_script('barefoot-admin', 'barefoot_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'ajaxurl' => admin_url('admin-ajax.php'), // Add both for compatibility
                 'nonce' => wp_create_nonce('barefoot_nonce'),
             ));
         }
