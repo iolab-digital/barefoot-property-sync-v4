@@ -108,7 +108,7 @@ class Barefoot_API {
     
     /**
      * Get all properties from Barefoot API using GetProperty method
-     * Since GetAllProperty returns "Custom method", we use individual property retrieval
+     * The GetProperty method (with only auth params) returns all properties in PropertyList XML format
      */
     public function get_all_properties() {
         if (!$this->soap_client) {
@@ -118,20 +118,33 @@ class Barefoot_API {
         try {
             $params = $this->get_auth_params();
             
-            error_log('Barefoot API: Using GetProperty method instead of GetAllProperty');
+            error_log('Barefoot API: Calling GetProperty method to retrieve all properties');
             
-            // Strategy 1: Try GetProperty method first (might return all properties)
+            // Call GetProperty with only authentication parameters (returns all properties)
             try {
                 $response = $this->soap_client->GetProperty($params);
                 
                 if (isset($response->GetPropertyResult)) {
                     $result = $response->GetPropertyResult;
                     
-                    // Check if we got actual property data
-                    if (isset($result->any) && !empty($result->any)) {
-                        $properties = $this->parse_xml_properties($result->any);
+                    // Parse the PropertyList XML response
+                    if (is_string($result)) {
+                        // Response is directly a string
+                        $properties = $this->parse_property_list_xml($result);
                         if (!empty($properties)) {
-                            error_log('Barefoot API: GetProperty returned ' . count($properties) . ' properties');
+                            error_log('Barefoot API: GetProperty successfully returned ' . count($properties) . ' properties');
+                            return array(
+                                'success' => true,
+                                'data' => $properties,
+                                'count' => count($properties),
+                                'method_used' => 'GetProperty'
+                            );
+                        }
+                    } elseif (isset($result->any) && !empty($result->any)) {
+                        // Response has 'any' property containing XML string
+                        $properties = $this->parse_property_list_xml($result->any);
+                        if (!empty($properties)) {
+                            error_log('Barefoot API: GetProperty successfully returned ' . count($properties) . ' properties');
                             return array(
                                 'success' => true,
                                 'data' => $properties,
@@ -141,8 +154,8 @@ class Barefoot_API {
                         }
                     }
                     
-                    // If GetProperty doesn't return bulk data, try individual retrieval
-                    error_log('Barefoot API: GetProperty did not return bulk data, trying individual property retrieval');
+                    // If we got a response but no properties parsed, log it
+                    error_log('Barefoot API: GetProperty returned response but no properties were parsed');
                 }
             } catch (Exception $e) {
                 error_log('Barefoot API: GetProperty method failed: ' . $e->getMessage());
