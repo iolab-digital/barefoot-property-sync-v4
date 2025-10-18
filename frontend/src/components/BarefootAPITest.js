@@ -237,7 +237,7 @@ export default function BarefootAPITest() {
         <div className="mt-6 bg-white rounded-lg shadow p-6">
           <h3 className="font-semibold text-gray-900 mb-3">API Configuration</h3>
           <div className="space-y-1 text-sm text-gray-700">
-            <p><strong>Endpoint:</strong> https://apps.barefoottech.com/barefoot/wapi.asmx</p>
+            <p><strong>Endpoint:</strong> https://portals.barefoot.com/BarefootWebService/BarefootService.asmx</p>
             <p><strong>Username:</strong> hfa20250814</p>
             <p><strong>Barefoot Account:</strong> v3chfa0604</p>
             <p><strong>Backend API:</strong> {API}</p>
