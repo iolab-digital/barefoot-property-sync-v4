@@ -1,0 +1,9 @@
+# This file ensures the languages directory is tracked by Git
+# Translation files (.po, .mo) will be added here
+
+# Add your translation files here:
+# barefoot-properties-es_ES.po
+# barefoot-properties-es_ES.mo
+# barefoot-properties-fr_FR.po
+# barefoot-properties-fr_FR.mo
+# etc.
