@@ -107,8 +107,8 @@ class Barefoot_API {
     }
     
     /**
-     * Get all properties from Barefoot API
-     * Uses multiple methods due to GetAllProperty returning "Custom method" response
+     * Get all properties from Barefoot API using GetProperty method
+     * Since GetAllProperty returns "Custom method", we use individual property retrieval
      */
     public function get_all_properties() {
         if (!$this->soap_client) {
@@ -118,66 +118,256 @@ class Barefoot_API {
         try {
             $params = $this->get_auth_params();
             
-            error_log('Barefoot API: Attempting property retrieval with account: ' . $this->account);
+            error_log('Barefoot API: Using GetProperty method instead of GetAllProperty');
             
-            // First, try GetAllProperty method
-            $response = $this->soap_client->GetAllProperty($params);
-            
-            if (isset($response->GetAllPropertyResult)) {
-                $result = $response->GetAllPropertyResult;
+            // Strategy 1: Try GetProperty method first (might return all properties)
+            try {
+                $response = $this->soap_client->GetProperty($params);
                 
-                // Check if we have actual property data
-                $properties = array();
-                
-                if (isset($result->PROPERTIES) && isset($result->PROPERTIES->PROPERTY)) {
-                    $property_data = $result->PROPERTIES->PROPERTY;
-                    $properties = is_array($property_data) ? $property_data : array($property_data);
-                    error_log('Barefoot API: Found ' . count($properties) . ' properties in PROPERTIES container');
-                } elseif (isset($result->any) && !empty($result->any)) {
-                    $properties = $this->parse_xml_properties($result->any);
-                    error_log('Barefoot API: Found ' . count($properties) . ' properties in XML data');
+                if (isset($response->GetPropertyResult)) {
+                    $result = $response->GetPropertyResult;
+                    
+                    // Check if we got actual property data
+                    if (isset($result->any) && !empty($result->any)) {
+                        $properties = $this->parse_xml_properties($result->any);
+                        if (!empty($properties)) {
+                            error_log('Barefoot API: GetProperty returned ' . count($properties) . ' properties');
+                            return array(
+                                'success' => true,
+                                'data' => $properties,
+                                'count' => count($properties),
+                                'method_used' => 'GetProperty'
+                            );
+                        }
+                    }
+                    
+                    // If GetProperty doesn't return bulk data, try individual retrieval
+                    error_log('Barefoot API: GetProperty did not return bulk data, trying individual property retrieval');
                 }
-                
-                if (count($properties) > 0) {
-                    return array(
-                        'success' => true,
-                        'data' => $properties,
-                        'count' => count($properties),
-                        'method_used' => 'GetAllProperty'
-                    );
-                }
+            } catch (Exception $e) {
+                error_log('Barefoot API: GetProperty method failed: ' . $e->getMessage());
             }
             
-            // If GetAllProperty doesn't return data, try alternative methods
-            error_log('Barefoot API: GetAllProperty returned no data - trying alternative methods');
-            return $this->try_alternative_property_methods();
+            // Strategy 2: Get properties individually by ID
+            $properties = $this->get_properties_by_id_range();
+            
+            if (!empty($properties)) {
+                return array(
+                    'success' => true,
+                    'data' => $properties,
+                    'count' => count($properties),
+                    'method_used' => 'GetProperty by ID range'
+                );
+            }
+            
+            // Strategy 3: Try alternative working methods
+            $alt_properties = $this->try_alternative_working_methods();
+            
+            if ($alt_properties['success']) {
+                return $alt_properties;
+            }
+            
+            // If no properties found, return successful but empty result
+            return array(
+                'success' => true,
+                'data' => array(),
+                'count' => 0,
+                'method_used' => 'GetProperty (various attempts)',
+                'message' => 'API connection successful using GetProperty method, but no properties returned. Account may not have properties configured or may require different parameters.'
+            );
             
         } catch (SoapFault $e) {
-            error_log('Barefoot GetAllProperty SOAP Fault: ' . $e->getMessage());
+            error_log('Barefoot GetProperty SOAP Fault: ' . $e->getMessage());
             return array('success' => false, 'message' => 'SOAP Fault: ' . $e->getMessage());
         } catch (Exception $e) {
-            error_log('Barefoot GetAllProperty Error: ' . $e->getMessage());
+            error_log('Barefoot GetProperty Error: ' . $e->getMessage());
             return array('success' => false, 'message' => 'API Error: ' . $e->getMessage());
         }
     }
     
     /**
-     * Try alternative methods to retrieve properties
+     * Get properties by testing individual property IDs
      */
-    private function try_alternative_property_methods() {
+    private function get_properties_by_id_range() {
         $params = $this->get_auth_params();
         $properties = array();
         
-        // Try methods that are known to work
+        error_log('Barefoot API: Attempting to retrieve properties by individual IDs');
+        
+        // Test first 20 property IDs (we know 1-10 exist from debugging)
+        for ($id = 1; $id <= 20; $id++) {
+            try {
+                $property_params = array_merge($params, array('addressid' => (string)$id));
+                $response = $this->soap_client->GetPropertyInfoById($property_params);
+                
+                if (isset($response->GetPropertyInfoByIdResult->any)) {
+                    $xml_data = $response->GetPropertyInfoByIdResult->any;
+                    
+                    // Check if it's a successful response
+                    if (strpos($xml_data, '<Success>true</Success>') !== false) {
+                        error_log("Barefoot API: Property ID {$id} exists");
+                        
+                        // Get detailed property information using GetProperty with ID
+                        $detailed_property = $this->get_detailed_property_by_id($id);
+                        if ($detailed_property) {
+                            $properties[] = $detailed_property;
+                        }
+                    }
+                }
+                
+            } catch (Exception $e) {
+                // Skip this ID and continue
+                continue;
+            }
+            
+            // Limit to prevent too many API calls (max 10 properties for now)
+            if (count($properties) >= 10) {
+                break;
+            }
+        }
+        
+        error_log('Barefoot API: Retrieved ' . count($properties) . ' properties by ID range');
+        return $properties;
+    }
+    
+    /**
+     * Get detailed property information for a specific property ID
+     */
+    private function get_detailed_property_by_id($property_id) {
+        $params = $this->get_auth_params();
+        
+        try {
+            // Try different methods to get detailed property info
+            $methods_to_try = array(
+                array('method' => 'GetProperty', 'param' => 'propertyId', 'value' => (string)$property_id),
+                array('method' => 'GetPropertyExt', 'param' => 'propertyId', 'value' => (string)$property_id),
+                array('method' => 'GetPropertyInfoById', 'param' => 'addressid', 'value' => (string)$property_id),
+                array('method' => 'GetProperty', 'param' => 'PropertyID', 'value' => (string)$property_id),
+            );
+            
+            foreach ($methods_to_try as $method_config) {
+                try {
+                    $method_params = array_merge($params, array($method_config['param'] => $method_config['value']));
+                    $response = $this->soap_client->{$method_config['method']}($method_params);
+                    
+                    $result_key = $method_config['method'] . 'Result';
+                    if (isset($response->$result_key->any)) {
+                        $xml_data = $response->$result_key->any;
+                        
+                        // Parse the XML to create a property object
+                        $property = $this->parse_single_property_from_xml($xml_data, $property_id);
+                        if ($property && $this->validate_property_data($property)) {
+                            error_log("Barefoot API: Successfully retrieved detailed data for property {$property_id} using {$method_config['method']}");
+                            return $property;
+                        }
+                    }
+                    
+                } catch (Exception $e) {
+                    continue;
+                }
+            }
+            
+        } catch (Exception $e) {
+            error_log("Barefoot API: Error getting detailed property info for ID {$property_id}: " . $e->getMessage());
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Parse single property XML and create property object with proper field mapping
+     */
+    private function parse_single_property_from_xml($xml_data, $property_id) {
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($xml_data);
+        
+        if ($xml !== false) {
+            $property = new stdClass();
+            
+            // Set the property ID
+            $property->PropertyID = (string)$property_id;
+            
+            // Map common property fields from XML
+            $field_mappings = array(
+                'PropertyName' => array('PropertyName', 'Name', 'Title', 'PropertyTitle'),
+                'Description' => array('Description', 'PropertyDescription', 'Desc'),
+                'City' => array('City', 'PropertyCity'),
+                'State' => array('State', 'PropertyState'),
+                'Zip' => array('Zip', 'ZipCode', 'PostalCode'),
+                'Address' => array('Address', 'PropertyAddress', 'FullAddress'),
+                'Occupancy' => array('Occupancy', 'MaxOccupancy', 'Sleeps'),
+                'Bedrooms' => array('Bedrooms', 'BedroomCount', 'Beds'),
+                'Bathrooms' => array('Bathrooms', 'BathroomCount', 'Baths'),
+                'MinPrice' => array('MinPrice', 'MinimumRate', 'LowRate'),
+                'MaxPrice' => array('MaxPrice', 'MaximumRate', 'HighRate'),
+                'PropertyType' => array('PropertyType', 'Type', 'UnitType'),
+            );
+            
+            // Extract data from XML
+            foreach ($xml->children() as $key => $value) {
+                $field_value = trim((string)$value);
+                if (!empty($field_value) && $field_value !== 'false' && $field_value !== '0') {
+                    $property->$key = $field_value;
+                }
+            }
+            
+            // Extract from XML attributes
+            foreach ($xml->attributes() as $key => $value) {
+                $field_value = trim((string)$value);
+                if (!empty($field_value)) {
+                    $property->$key = $field_value;
+                }
+            }
+            
+            // Apply field mappings to standardize property names
+            foreach ($field_mappings as $standard_field => $possible_fields) {
+                foreach ($possible_fields as $field) {
+                    if (isset($property->$field) && !empty($property->$field)) {
+                        $property->$standard_field = $property->$field;
+                        break;
+                    }
+                }
+            }
+            
+            // Set default name if not found
+            if (empty($property->Name) && empty($property->PropertyName)) {
+                $property->Name = 'Property ' . $property_id;
+                $property->PropertyName = 'Property ' . $property_id;
+            }
+            
+            return $property;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Validate property data to ensure it has minimum required fields
+     */
+    private function validate_property_data($property) {
+        // Property must have at least an ID and name
+        $has_id = !empty($property->PropertyID);
+        $has_name = !empty($property->Name) || !empty($property->PropertyName) || !empty($property->Title);
+        
+        return $has_id && $has_name;
+    }
+    
+    /**
+     * Try alternative working methods discovered during debugging
+     */
+    private function try_alternative_working_methods() {
+        $params = $this->get_auth_params();
+        $properties = array();
+        
+        // Try methods that were successful in debugging
         $working_methods = array(
-            'GetProperty',
             'GetPropertyExt',
             'GetLastUpdatedProperty'
         );
         
         foreach ($working_methods as $method) {
             try {
-                error_log("Barefoot API: Trying method: {$method}");
+                error_log("Barefoot API: Trying alternative method: {$method}");
                 $response = $this->soap_client->$method($params);
                 
                 $result_key = $method . 'Result';
@@ -199,11 +389,6 @@ class Barefoot_API {
             }
         }
         
-        // Try to get properties by ID range if no bulk methods work
-        if (empty($properties)) {
-            $properties = $this->discover_properties_by_id();
-        }
-        
         if (count($properties) > 0) {
             // Remove duplicates
             $properties = $this->remove_duplicate_properties($properties);
@@ -212,58 +397,11 @@ class Barefoot_API {
                 'success' => true,
                 'data' => $properties,
                 'count' => count($properties),
-                'method_used' => 'Alternative methods'
+                'method_used' => 'Alternative methods (' . implode(', ', $working_methods) . ')'
             );
         }
         
-        // Return successful but empty result
-        return array(
-            'success' => true,
-            'data' => array(),
-            'count' => 0,
-            'method_used' => 'Multiple methods attempted',
-            'message' => 'API connection successful but no properties found. Account may not have properties configured or may require additional permissions.'
-        );
-    }
-    
-    /**
-     * Discover properties by testing property IDs
-     */
-    private function discover_properties_by_id() {
-        $params = $this->get_auth_params();
-        $properties = array();
-        
-        // Test first 20 property IDs
-        for ($id = 1; $id <= 20; $id++) {
-            try {
-                $property_params = array_merge($params, array('addressid' => $id));
-                $response = $this->soap_client->GetPropertyInfoById($property_params);
-                
-                if (isset($response->GetPropertyInfoByIdResult->any)) {
-                    $xml_data = $response->GetPropertyInfoByIdResult->any;
-                    
-                    // Check if it's a successful response
-                    if (strpos($xml_data, '<Success>true</Success>') !== false) {
-                        error_log("Barefoot API: Found existing property with ID: {$id}");
-                        
-                        $property = $this->create_property_from_id($id, $xml_data);
-                        if ($property) {
-                            $properties[] = $property;
-                        }
-                    }
-                }
-                
-            } catch (Exception $e) {
-                continue;
-            }
-            
-            // Limit to prevent too many API calls
-            if (count($properties) >= 10) {
-                break;
-            }
-        }
-        
-        return $properties;
+        return array('success' => false, 'message' => 'No properties found using alternative methods');
     }
     
     /**
