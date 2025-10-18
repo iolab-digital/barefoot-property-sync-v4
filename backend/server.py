@@ -99,6 +99,29 @@ async def get_barefoot_property(property_id: int):
         logger.error(f"Error getting property {property_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/barefoot/available-methods")
+async def get_available_methods():
+    """Get all available SOAP methods"""
+    try:
+        if not barefoot_api.client:
+            barefoot_api._init_client()
+        
+        # Get all operations
+        operations = [op.name for op in barefoot_api.client.wsdl.services[0].ports[0].binding._operations.values()]
+        
+        # Filter property-related methods
+        property_methods = [op for op in operations if 'property' in op.lower() or 'Property' in op]
+        
+        return {
+            'success': True,
+            'total_methods': len(operations),
+            'property_methods': property_methods,
+            'all_methods': operations
+        }
+    except Exception as e:
+        logger.error(f"Error getting methods: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
