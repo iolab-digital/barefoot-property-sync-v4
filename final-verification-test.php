@@ -61,7 +61,7 @@ try {
         echo "🏠 Properties Found: {$count}<br>\n";
         echo "⚙️ Method Used: {$method}<br>\n";
         
-        if (!empty($properties_response['message'])) {\n";
+        if (!empty($properties_response['message'])) {
             echo "📝 Details: " . htmlspecialchars($properties_response['message']) . "<br>\n";
         }
         
