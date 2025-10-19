@@ -153,8 +153,8 @@ class Barefoot_Property_Sync {
             // Set property taxonomies
             $this->set_property_taxonomies($post_id, $property_data);
             
-            // Sync property images
-            $this->sync_property_images($post_id, $property_id);
+            // Note: Image sync is now separate - use "Sync Images" button in admin
+            // This keeps property sync fast and allows separate control over image downloads
             
             // Sync property rates
             $this->sync_property_rates($post_id, $property_id);
