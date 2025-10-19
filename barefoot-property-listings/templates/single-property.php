@@ -1,9 +1,9 @@
 <?php
 /**
- * Single Property Template - Luxury Design
+ * Single Property Template - Luxury Minimalist Design
  * 
  * @package BarefootPropertyListings
- * @since 1.2.0
+ * @since 1.3.0
  */
 
 // Get property meta data
