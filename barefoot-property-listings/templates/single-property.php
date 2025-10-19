@@ -32,17 +32,26 @@ get_header(); ?>
                 <?php
                 $min_price = get_post_meta(get_the_ID(), '_barefoot_min_price', true);
                 $max_price = get_post_meta(get_the_ID(), '_barefoot_max_price', true);
+                
+                // Check if prices are numeric
+                $min_price_numeric = is_numeric($min_price) ? floatval($min_price) : false;
+                $max_price_numeric = is_numeric($max_price) ? floatval($max_price) : false;
+                
                 if ($min_price || $max_price):
                 ?>
                     <div class="property-price">
-                        <?php if ($min_price && $max_price): ?>
-                            <span class="price-range">$<?php echo number_format($min_price); ?> - $<?php echo number_format($max_price); ?></span>
-                        <?php elseif ($min_price): ?>
-                            <span class="price-from">From $<?php echo number_format($min_price); ?></span>
+                        <?php if ($min_price_numeric && $max_price_numeric): ?>
+                            <span class="price-range">$<?php echo number_format($min_price_numeric); ?> - $<?php echo number_format($max_price_numeric); ?></span>
+                        <?php elseif ($min_price_numeric): ?>
+                            <span class="price-from">From $<?php echo number_format($min_price_numeric); ?></span>
+                        <?php elseif ($max_price_numeric): ?>
+                            <span class="price-up-to">Up to $<?php echo number_format($max_price_numeric); ?></span>
                         <?php else: ?>
-                            <span class="price-up-to">Up to $<?php echo number_format($max_price); ?></span>
+                            <span class="price-contact"><?php echo esc_html($min_price ?: $max_price); ?></span>
                         <?php endif; ?>
-                        <span class="price-unit"><?php _e('per night', 'barefoot-properties'); ?></span>
+                        <?php if ($min_price_numeric || $max_price_numeric): ?>
+                            <span class="price-unit"><?php _e('per week', 'barefoot-properties'); ?></span>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </header>
