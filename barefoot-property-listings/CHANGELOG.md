@@ -2,9 +2,22 @@
 
 All notable changes to the Barefoot Property Listings plugin.
 
-## [1.2.0] - 2025-01-18
+## [1.3.0] - 2025-01-18
 
-### 🎉 New Feature - Separate Image Sync Button
+### 🎨 New Feature - Single Hero Image + Gallery Scroller
+- **REDESIGNED:** Single property page with luxury minimalist design
+- **FEATURE:** Single full-width hero image (600px height)
+- **FEATURE:** Horizontal scrolling gallery with arrow navigation
+- **IMPROVED:** Gallery starts from 2nd image (1st is hero)
+- **FEATURE:** Smooth scroll behavior with touch support
+- **RESULT:** Beautiful, modern property showcase
+
+### Template Improvements
+- Inline styles for faster loading
+- Responsive design for all devices
+- Sticky sidebar with agent card
+- Improved contact form styling
+- Related properties with actual property images
 - **ADDED:** Separate "Sync Images" button for independent image synchronization
 - **IMPROVED:** Property sync now faster (images synced separately on demand)
 - **FEATURE:** Dedicated AJAX handler for image sync (`barefoot_ajax_sync_images`)
