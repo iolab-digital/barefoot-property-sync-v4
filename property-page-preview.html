@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Beachfront Property - Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Property Page Styles */
+        .hero-image-single {
+            height: 600px;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-image: url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200');
+        }
+
+        .hero-image-single img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .breadcrumb {
+            padding: 15px 60px;
+            font-size: 11px;
+            color: #666;
+            border-bottom: 1px solid #e5e5e5;
+            background: white;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #0a3d5c;
+        }
+
+        .bf-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 60px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .property-header {
+            margin-bottom: 30px;
+        }
+
+        .property-header h1 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            color: #333;
+        }
+
+        .property-address {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 40px;
+            padding: 25px 0;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #999;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 300;
+            color: #333;
+        }
+
+        .description {
+            font-size: 14px;
+            line-height: 1.9;
+            color: #555;
+            margin-bottom: 50px;
+        }
+
+        .description p {
+            margin-bottom: 20px;
+        }
+
+        /* Gallery Scroller */
+        .gallery-section {
+            margin: 60px 0;
+            position: relative;
+        }
+
+        .gallery-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-scroller {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 10px 0;
+        }
+
+        .gallery-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-item {
+            flex: 0 0 calc(33.333% - 14px);
+            height: 350px;
+            position: relative;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .gallery-arrow:hover {
+            background: #f5f5f5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .gallery-arrow.left {
+            left: 20px;
+        }
+
+        .gallery-arrow.right {
+            right: 20px;
+        }
+
+        .gallery-arrow svg {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .agent-card {
+            background: #0a3d5c;
+            color: white;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .agent-photo {
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+
+        .agent-name {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .agent-title {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: white;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .btn-primary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #f9f9f9;
+        }
+
+        .map-section {
+            height: 400px;
+            background: linear-gradient(to bottom, #c8e5d4 0%, #a8d5c4 100%);
+            margin: 60px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 3px;
+        }
+
+        .about-area {
+            background: #0a3d5c;
+            color: white;
+            padding: 80px 60px;
+            text-align: center;
+            margin: 60px -60px;
+        }
+
+        .about-area h2 {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .about-area p {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.9;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .property-details {
+            margin: 80px 0;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+            color: #333;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px 60px;
+        }
+
+        .detail-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            color: #999;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .agent-section {
+            background: #fafafa;
+            padding: 60px;
+            margin: 60px -60px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 60px;
+        }
+
+        .agent-photo-large {
+            width: 250px;
+            height: 300px;
+            background: linear-gradient(135deg, #e8eef2 0%, #d4dfe8 100%);
+        }
+
+        .agent-info h3 {
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .contact-details {
+            font-size: 13px;
+            color: #666;
+            margin: 20px 0 30px;
+        }
+
+        .contact-details div {
+            margin-bottom: 5px;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .form-field {
+            width: 100%;
+            padding: 15px;
+            background: #f5f5f5;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #e5e5e5;
+            font-family: inherit;
+        }
+
+        .form-field:focus {
+            outline: none;
+            border-color: #0a3d5c;
+            background: white;
+        }
+
+        .form-field.large {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: #0a3d5c;
+            color: white;
+            padding: 15px 40px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #083046;
+        }
+
+        .similar-properties {
+            background: #0a3d5c;
+            padding: 80px 60px;
+            margin: 60px -60px;
+        }
+
+        .similar-properties h2 {
+            color: white;
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .property-card {
+            background: white;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-image {
+            height: 200px;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-price {
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .card-specs {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 400;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .card-address {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .two-col,
+            .agent-section {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+            
+            .properties-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .gallery-item {
+                flex: 0 0 calc(50% - 10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-image-single {
+                height: 400px;
+            }
+            
+            .bf-container {
+                padding: 30px 20px;
+            }
+            
+            .breadcrumb {
+                padding: 15px 20px;
+            }
+            
+            .about-area,
+            .similar-properties,
+            .agent-section {
+                margin: 40px -20px;
+                padding: 50px 20px;
+            }
+            
+            .properties-grid,
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-bar {
+                gap: 20px;
+            }
+            
+            .gallery-item {
+                flex: 0 0 calc(100% - 20px);
+            }
+            
+            .gallery-arrow {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .gallery-arrow.left {
+                left: 10px;
+            }
+            
+            .gallery-arrow.right {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero Image Section -->
+<div class="hero-image-single">
+    <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200" alt="Luxury Beachfront Property">
+</div>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">Home</a> / 
+    <a href="#">Properties</a> / 
+    Wildwood / 
+    4700 Atlantic Ave Unit 104
+</div>
+
+<!-- Main Container -->
+<div class="bf-container">
+    <div class="two-col">
+        <!-- Left Column -->
+        <div class="left-col">
+            <!-- Property Header -->
+            <div class="property-header">
+                <h1>4700 Atlantic Ave Unit 104</h1>
+                <div class="property-address">
+                    Wildwood, New Jersey 08260, United States
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-label">From</div>
+                    <div class="stat-value">$2,500</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Bedrooms</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Bathrooms</div>
+                    <div class="stat-value">2</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Sleeps</div>
+                    <div class="stat-value">8</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description">
+                <p>
+                    Experience beachfront living at its finest in this stunning Wildwood property. This exceptional residence offers breathtaking views of the Atlantic Ocean, combining elegant design with natural beauty.
+                </p>
+                <p>
+                    The home features an open floor plan with floor-to-ceiling windows that capture the spectacular ocean vistas. High-end finishes throughout include hardwood floors, custom cabinetry, and top-of-the-line appliances.
+                </p>
+                <p>
+                    The property sits on a prime oceanfront location with private beach access, multiple outdoor living spaces perfect for entertaining or quiet relaxation. This is a rare opportunity to experience paradise in one of New Jersey's most sought-after vacation destinations.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Column / Sidebar -->
+        <div class="sidebar">
+            <div class="agent-card">
+                <div class="agent-photo"></div>
+                <div class="agent-name">Property Manager</div>
+                <div class="agent-title">Barefoot Vacation Rentals</div>
+            </div>
+            <div class="sidebar-buttons">
+                <button class="btn btn-primary" onclick="alert('Contact form would scroll into view')">
+                    Request Information
+                </button>
+                <button class="btn btn-secondary" onclick="alert('Contact form would scroll into view')">
+                    Check Availability
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Scroller -->
+    <div class="gallery-section">
+        <button class="gallery-arrow left" onclick="scrollGallery('left')">
+            <svg viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <div class="gallery-container">
+            <div class="gallery-scroller" id="galleryScroller">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800" alt="Living Room">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800" alt="Kitchen">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800" alt="Bedroom">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800" alt="Bathroom">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800" alt="Exterior">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800" alt="Patio">
+                </div>
+            </div>
+        </div>
+        <button class="gallery-arrow right" onclick="scrollGallery('right')">
+            <svg viewBox="0 0 24 24">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Map Section -->
+    <div class="map-section">
+        MAP
+    </div>
+
+    <!-- About Area -->
+    <div class="about-area">
+        <h2>About Wildwood</h2>
+        <p>
+            Wildwood, New Jersey offers an unparalleled beach vacation experience with pristine sandy beaches, vibrant boardwalk entertainment, and family-friendly attractions. This coastal community combines classic Jersey Shore charm with modern amenities, making it one of the most desirable vacation destinations on the East Coast. With stunning ocean views year-round and a welcoming beach town atmosphere, Wildwood represents the very best of coastal living.
+        </p>
+    </div>
+
+    <!-- Property Details -->
+    <div class="property-details">
+        <h2 class="section-title">Property Details</h2>
+        <div class="details-grid">
+            <div class="detail-item">
+                <div class="detail-label">Property Type</div>
+                <div class="detail-value">Condominium</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Unit Type</div>
+                <div class="detail-value">Vacation Rental</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Maximum Occupancy</div>
+                <div class="detail-value">8 Guests</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Bedrooms</div>
+                <div class="detail-value">3</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Bathrooms</div>
+                <div class="detail-value">2</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Sleeping Arrangements</div>
+                <div class="detail-value">King, Queen, 2 Twins</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Number of Floors</div>
+                <div class="detail-value">1</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Amenities</div>
+                <div class="detail-value">WiFi, Pool, Beach Access, Parking, Air Conditioning</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Section / Contact Form -->
+    <div class="agent-section" id="contact-form-section">
+        <div class="agent-photo-large"></div>
+        <div class="agent-info">
+            <h3>Contact Our Team</h3>
+            <div style="font-size: 13px; color: #999; margin-bottom: 5px;">Barefoot Vacation Rentals</div>
+            <div class="contact-details">
+                <div>Phone: (609) 555-0123</div>
+                <div>Email: info@barefootvacations.com</div>
+            </div>
+            <div style="font-size: 13px; line-height: 1.8; color: #666;">
+                Our experienced team is ready to help you plan your perfect vacation. Contact us for availability, rates, and any questions you may have about this property.
+            </div>
+            <div class="contact-form">
+                <form onsubmit="alert('Form submission would be handled by WordPress AJAX'); return false;">
+                    <input type="text" name="name" placeholder="Name *" class="form-field" required>
+                    <input type="email" name="email" placeholder="Email *" class="form-field" required>
+                    <input type="tel" name="phone" placeholder="Phone" class="form-field">
+                    <textarea name="message" placeholder="Message *" class="form-field large" required></textarea>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Properties -->
+    <div class="similar-properties">
+        <h2>Continue Your Search</h2>
+        <div class="properties-grid">
+            <a href="#" class="property-card">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600" alt="Property">
+                </div>
+                <div class="card-content">
+                    <div class="card-price">From $3,200</div>
+                    <div class="card-specs">4 Beds | 3 Baths | Sleeps 10</div>
+                    <div class="card-title">Oceanfront Paradise</div>
+                    <div class="card-address">North Wildwood, NJ</div>
+                </div>
+            </a>
+            <a href="#" class="property-card">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600" alt="Property">
+                </div>
+                <div class="card-content">
+                    <div class="card-price">From $1,850</div>
+                    <div class="card-specs">2 Beds | 2 Baths | Sleeps 6</div>
+                    <div class="card-title">Cozy Beach Retreat</div>
+                    <div class="card-address">Wildwood Crest, NJ</div>
+                </div>
+            </a>
+            <a href="#" class="property-card">
+                <div class="card-image">
+                    <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600" alt="Property">
+                </div>
+                <div class="card-content">
+                    <div class="card-price">From $2,750</div>
+                    <div class="card-specs">3 Beds | 2.5 Baths | Sleeps 8</div>
+                    <div class="card-title">Modern Coastal Home</div>
+                    <div class="card-address">Cape May, NJ</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gallery scroller function
+function scrollGallery(direction) {
+    const scroller = document.getElementById('galleryScroller');
+    const scrollAmount = scroller.offsetWidth * 0.8;
+    
+    if (direction === 'left') {
+        scroller.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+        scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+}
+</script>
+
+</body>
+</html>
