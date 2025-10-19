@@ -94,6 +94,9 @@ class BarefootPropertyListings {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         
+        // Print inline admin script (for AJAX variables)
+        add_action('admin_head', array($this, 'print_admin_inline_script'));
+        
         // Template hooks
         add_filter('single_template', array($this, 'single_property_template'));
         add_filter('archive_template', array($this, 'archive_property_template'));
