@@ -356,7 +356,11 @@ class Barefoot_Frontend_Display {
                 
                 <?php if ($min_price): ?>
                     <div class="property-price">
-                        <?php printf(__('From $%s/night', 'barefoot-properties'), number_format($min_price)); ?>
+                        <?php if (is_numeric($min_price)): ?>
+                            <?php printf(__('From $%s/week', 'barefoot-properties'), number_format(floatval($min_price))); ?>
+                        <?php else: ?>
+                            <?php echo esc_html($min_price); ?>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
                 
