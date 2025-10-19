@@ -208,13 +208,19 @@ backend:
     implemented: true
     working: "NA"
     file: "/app/barefoot-property-listings/includes/class-property-sync.php"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "IMPLEMENTED: Added image synchronization using GetPropertyAllImgsXML API method. Images are fetched, downloaded to WordPress media library, and attached to property posts. First image is set as featured image. Fixed bug where sync_property_images checked 'data' key instead of 'images' key. Updated field names to match parse_property_images_xml output. Includes duplicate detection and comprehensive error logging. Ready for testing."
+        - working: false
+        - agent: "user"
+        - comment: "ISSUE REPORTED: User reports no images appearing in media library or on property pages after sync."
+        - working: "NA"
+        - agent: "main"
+        - comment: "FIX APPLIED: Changed sync_property_images() to directly access array keys instead of using get_property_field() helper method. Added extensive diagnostic logging throughout image sync process. Updated logging in get_property_images() API method. Created comprehensive troubleshooting guide (TROUBLESHOOTING_IMAGES.md) with diagnostic steps. Need user to check WordPress debug logs to identify specific failure point."
 
 frontend:
   - task: "WordPress plugin frontend display"
