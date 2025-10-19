@@ -3,7 +3,7 @@
  * Plugin Name: Barefoot Property Listings
  * Plugin URI: https://github.com/yourusername/barefoot-property-listings
  * Description: WordPress plugin that integrates with Barefoot Property Management System's SOAP API to synchronize and display vacation rental properties with image galleries.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Your Name
  * Author URI: https://yourwebsite.com
  * License: GPL v2 or later
