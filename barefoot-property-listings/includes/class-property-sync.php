@@ -328,34 +328,45 @@ class Barefoot_Property_Sync {
         try {
             $images_response = $this->api->get_property_images($property_id);
             
-            if (!$images_response['success'] || empty($images_response['data'])) {
+            if (!$images_response['success'] || empty($images_response['images'])) {
+                error_log("Barefoot Sync: No images found for property {$property_id}");
                 return;
             }
             
-            $images = $images_response['data'];
+            $images = $images_response['images'];
             $featured_set = false;
+            $images_synced = 0;
+            
+            error_log("Barefoot Sync: Starting image sync for property {$property_id}, found " . count($images) . " images");
             
             foreach ($images as $image_data) {
-                $image_url = $this->get_property_field($image_data, 'ImageUrl') ?: 
-                            $this->get_property_field($image_data, 'Url') ?:
-                            $this->get_property_field($image_data, 'ImagePath');
-                            
-                $image_caption = $this->get_property_field($image_data, 'Caption') ?: 
-                               $this->get_property_field($image_data, 'Description') ?:
-                               $this->get_property_field($image_data, 'Title');
+                // Get image URL from the standardized field name returned by parse_property_images_xml
+                $image_url = $this->get_property_field($image_data, 'image_url');
+                $image_caption = $this->get_property_field($image_data, 'description') ?: 'Property Image';
                 
                 if (empty($image_url)) {
+                    error_log("Barefoot Sync: Skipping image with empty URL");
                     continue;
                 }
+                
+                error_log("Barefoot Sync: Downloading image from: {$image_url}");
                 
                 // Download and attach image
                 $attachment_id = $this->download_and_attach_image($image_url, $post_id, $image_caption);
                 
-                if ($attachment_id && !$featured_set) {
-                    set_post_thumbnail($post_id, $attachment_id);
-                    $featured_set = true;
+                if ($attachment_id) {
+                    $images_synced++;
+                    
+                    // Set first image as featured image
+                    if (!$featured_set) {
+                        set_post_thumbnail($post_id, $attachment_id);
+                        $featured_set = true;
+                        error_log("Barefoot Sync: Set image {$attachment_id} as featured image for property {$property_id}");
+                    }
                 }
             }
+            
+            error_log("Barefoot Sync: Successfully synced {$images_synced} images for property {$property_id}");
             
         } catch (Exception $e) {
             error_log('Barefoot Image Sync Error: ' . $e->getMessage());
