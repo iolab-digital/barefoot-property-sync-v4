@@ -326,9 +326,19 @@ class Barefoot_Property_Sync {
      */
     private function sync_property_images($post_id, $property_id) {
         try {
+            error_log("Barefoot Sync: Attempting to fetch images for property {$property_id}");
+            
             $images_response = $this->api->get_property_images($property_id);
             
-            if (!$images_response['success'] || empty($images_response['images'])) {
+            // Log the full response for debugging
+            error_log("Barefoot Sync: Image API response: " . print_r($images_response, true));
+            
+            if (!$images_response['success']) {
+                error_log("Barefoot Sync: Image API call failed for property {$property_id}: " . ($images_response['message'] ?? 'Unknown error'));
+                return;
+            }
+            
+            if (empty($images_response['images'])) {
                 error_log("Barefoot Sync: No images found for property {$property_id}");
                 return;
             }
