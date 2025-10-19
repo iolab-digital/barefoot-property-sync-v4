@@ -565,7 +565,8 @@ class Barefoot_API {
     public function get_property_images($property_id) {
         try {
             if (!$this->soap_client) {
-                if (!$this->_init_client()) {
+                $this->init_soap_client();
+                if (!$this->soap_client) {
                     return array(
                         'success' => false,
                         'message' => 'Failed to initialize SOAP client'
