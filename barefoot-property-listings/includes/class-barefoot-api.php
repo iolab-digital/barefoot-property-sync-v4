@@ -564,9 +564,13 @@ class Barefoot_API {
      */
     public function get_property_images($property_id) {
         try {
+            error_log("Barefoot API: get_property_images called for property ID: {$property_id}");
+            
             if (!$this->soap_client) {
+                error_log("Barefoot API: SOAP client is null, attempting to initialize");
                 $this->init_soap_client();
                 if (!$this->soap_client) {
+                    error_log("Barefoot API: Failed to initialize SOAP client");
                     return array(
                         'success' => false,
                         'message' => 'Failed to initialize SOAP client'
@@ -579,9 +583,11 @@ class Barefoot_API {
                 array('propertyId' => $property_id)
             );
             
-            error_log("Barefoot API: Fetching images for property ID: {$property_id}");
+            error_log("Barefoot API: Calling GetPropertyAllImgsXML with params: " . print_r($params, true));
             
             $response = $this->soap_client->GetPropertyAllImgsXML($params);
+            
+            error_log("Barefoot API: GetPropertyAllImgsXML response received: " . print_r($response, true));
             
             if (isset($response->GetPropertyAllImgsXMLResult)) {
                 $result = $response->GetPropertyAllImgsXMLResult;
