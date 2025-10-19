@@ -211,6 +211,12 @@ class BarefootPropertyListings {
     public function enqueue_frontend_assets() {
         if (is_post_type_archive('barefoot_property') || is_singular('barefoot_property') || is_tax(array('property_type', 'location', 'amenity'))) {
             wp_enqueue_style('barefoot-frontend', BAREFOOT_PLUGIN_URL . 'assets/css/frontend.css', array(), BAREFOOT_VERSION);
+            
+            // Enqueue single property template CSS
+            if (is_singular('barefoot_property')) {
+                wp_enqueue_style('barefoot-single-property', BAREFOOT_PLUGIN_URL . 'assets/css/single-property.css', array('barefoot-frontend'), BAREFOOT_VERSION);
+            }
+            
             wp_enqueue_script('barefoot-frontend', BAREFOOT_PLUGIN_URL . 'assets/js/frontend.js', array('jquery'), BAREFOOT_VERSION, true);
             
             wp_localize_script('barefoot-frontend', 'barefoot_ajax', array(
