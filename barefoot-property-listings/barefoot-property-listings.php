@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
 // Plugin constants
 define('BAREFOOT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BAREFOOT_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('BAREFOOT_VERSION', '1.2.0');
+define('BAREFOOT_VERSION', '1.3.0');
 
 // Barefoot API Configuration
 // These can be overridden in wp-config.php for security
