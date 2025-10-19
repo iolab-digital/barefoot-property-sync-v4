@@ -74,13 +74,26 @@ update_option('barefoot_api_account', 'your_account_id_here');
 
 ## 🔧 API Integration
 
-### Correct SOAP Method
+### Property Synchronization
 
 The plugin uses **`GetProperty`** (singular) with authentication-only parameters to retrieve all properties:
 
 ```php
 $response = $this->soap_client->GetProperty($auth_params);
 ```
+
+### Image Synchronization
+
+During property sync, the plugin automatically:
+
+1. **Fetches Images** - Uses `GetPropertyAllImgsXML` API method for each property
+2. **Downloads to WordPress** - Saves images to WordPress uploads directory
+3. **Creates Attachments** - Generates WordPress media library entries with metadata
+4. **Sets Featured Image** - First image becomes the property's post thumbnail
+5. **Builds Galleries** - All images attached to property for gallery display
+6. **Prevents Duplicates** - Tracks original URLs to avoid re-downloading existing images
+
+The image sync happens automatically during batch property synchronization.
 
 ### Property Data
 
