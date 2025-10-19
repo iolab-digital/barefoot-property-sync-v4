@@ -431,18 +431,26 @@ class Barefoot_Frontend_Display {
                     <h3><?php _e('Pricing Information', 'barefoot-properties'); ?></h3>
                     <?php if ($property_data['min_price'] || $property_data['max_price']): ?>
                         <div class="price-range">
-                            <?php if ($property_data['min_price'] && $property_data['max_price']): ?>
-                                <?php printf(__('$%s - $%s per night', 'barefoot-properties'), 
-                                           number_format($property_data['min_price']), 
-                                           number_format($property_data['max_price'])); ?>
-                            <?php elseif ($property_data['min_price']): ?>
-                                <?php printf(__('From $%s per night', 'barefoot-properties'), number_format($property_data['min_price'])); ?>
-                            <?php elseif ($property_data['max_price']): ?>
-                                <?php printf(__('Up to $%s per night', 'barefoot-properties'), number_format($property_data['max_price'])); ?>
+                            <?php 
+                            $min_numeric = is_numeric($property_data['min_price']) ? floatval($property_data['min_price']) : false;
+                            $max_numeric = is_numeric($property_data['max_price']) ? floatval($property_data['max_price']) : false;
+                            ?>
+                            <?php if ($min_numeric && $max_numeric): ?>
+                                <?php printf(__('$%s - $%s per week', 'barefoot-properties'), 
+                                           number_format($min_numeric), 
+                                           number_format($max_numeric)); ?>
+                            <?php elseif ($min_numeric): ?>
+                                <?php printf(__('From $%s per week', 'barefoot-properties'), number_format($min_numeric)); ?>
+                            <?php elseif ($max_numeric): ?>
+                                <?php printf(__('Up to $%s per week', 'barefoot-properties'), number_format($max_numeric)); ?>
+                            <?php else: ?>
+                                <p class="price-contact"><?php echo esc_html($property_data['min_price'] ?: $property_data['max_price']); ?></p>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
-                    <p class="pricing-note"><?php _e('*Prices may vary by season and availability', 'barefoot-properties'); ?></p>
+                    <?php if ($min_numeric || $max_numeric): ?>
+                        <p class="pricing-note"><?php _e('*Prices may vary by season and availability', 'barefoot-properties'); ?></p>
+                    <?php endif; ?>
                 </div>
                 
                 <?php if ($property_data['address'] || $property_data['city'] || $property_data['state']): ?>
