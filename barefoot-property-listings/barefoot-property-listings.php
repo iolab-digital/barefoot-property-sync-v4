@@ -235,8 +235,10 @@ class BarefootPropertyListings {
                 'plugin_url' => BAREFOOT_PLUGIN_URL,
             ));
             
-            // Also make sure WordPress's global ajaxurl is available
-            echo '<script type="text/javascript">var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
+            // Also print ajaxurl inline for WordPress admin compatibility
+            add_action('admin_print_scripts', function() {
+                echo '<script type="text/javascript">var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
+            });
         }
     }
     
