@@ -405,6 +405,10 @@
                 html += '<p>Properties processed: ' + data.count + '</p>';
             }
             
+            if (data.total_images !== undefined) {
+                html += '<p>Total images synced: ' + data.total_images + '</p>';
+            }
+            
             if (data.errors && data.errors.length > 0) {
                 html += '<h4>Errors encountered:</h4><ul>';
                 data.errors.forEach(function(error) {
