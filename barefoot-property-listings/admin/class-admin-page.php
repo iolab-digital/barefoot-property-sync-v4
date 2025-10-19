@@ -707,13 +707,21 @@ class Barefoot_Admin_Page {
             case 'price_range':
                 $min_price = get_post_meta($post_id, '_barefoot_min_price', true);
                 $max_price = get_post_meta($post_id, '_barefoot_max_price', true);
+                
+                // Check if prices are numeric
+                $min_numeric = is_numeric($min_price) ? floatval($min_price) : false;
+                $max_numeric = is_numeric($max_price) ? floatval($max_price) : false;
+                
                 if ($min_price || $max_price) {
-                    if ($min_price && $max_price) {
-                        echo '$' . number_format($min_price) . ' - $' . number_format($max_price);
-                    } elseif ($min_price) {
-                        echo __('From', 'barefoot-properties') . ' $' . number_format($min_price);
+                    if ($min_numeric && $max_numeric) {
+                        echo '$' . number_format($min_numeric) . ' - $' . number_format($max_numeric);
+                    } elseif ($min_numeric) {
+                        echo __('From', 'barefoot-properties') . ' $' . number_format($min_numeric);
+                    } elseif ($max_numeric) {
+                        echo __('Up to', 'barefoot-properties') . ' $' . number_format($max_numeric);
                     } else {
-                        echo __('Up to', 'barefoot-properties') . ' $' . number_format($max_price);
+                        // Non-numeric price (e.g., "Please call")
+                        echo esc_html($min_price ?: $max_price);
                     }
                 } else {
                     echo '—';
