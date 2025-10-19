@@ -340,12 +340,12 @@ class Barefoot_Property_Sync {
             error_log("Barefoot Sync: Starting image sync for property {$property_id}, found " . count($images) . " images");
             
             foreach ($images as $image_data) {
-                // Get image URL from the standardized field name returned by parse_property_images_xml
-                $image_url = $this->get_property_field($image_data, 'image_url');
-                $image_caption = $this->get_property_field($image_data, 'description') ?: 'Property Image';
+                // Get image URL directly from array (returned by parse_property_images_xml)
+                $image_url = isset($image_data['image_url']) ? $image_data['image_url'] : '';
+                $image_caption = isset($image_data['description']) ? $image_data['description'] : 'Property Image';
                 
                 if (empty($image_url)) {
-                    error_log("Barefoot Sync: Skipping image with empty URL");
+                    error_log("Barefoot Sync: Skipping image with empty URL. Image data: " . print_r($image_data, true));
                     continue;
                 }
                 
