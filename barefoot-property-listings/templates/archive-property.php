@@ -86,11 +86,17 @@ get_header(); ?>
                                     <?php
                                     $min_price = get_post_meta(get_the_ID(), '_barefoot_min_price', true);
                                     if ($min_price):
+                                        if (is_numeric($min_price)):
                                     ?>
                                         <div class="price-overlay">
-                                            <span class="price-text">From $<?php echo number_format($min_price); ?></span>
-                                            <span class="price-unit">/night</span>
+                                            <span class="price-text">From $<?php echo number_format(floatval($min_price)); ?></span>
+                                            <span class="price-unit">/week</span>
                                         </div>
+                                    <?php else: ?>
+                                        <div class="price-overlay">
+                                            <span class="price-text"><?php echo esc_html($min_price); ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
