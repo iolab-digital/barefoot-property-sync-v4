@@ -226,19 +226,32 @@ class BarefootPropertyListings {
             // Enqueue admin JS with jQuery dependency
             wp_enqueue_script('barefoot-admin', BAREFOOT_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), BAREFOOT_VERSION, true);
             
-            // IMPORTANT: Localize script AFTER enqueuing
-            // This passes PHP variables to JavaScript
+            // Try wp_localize_script first
             wp_localize_script('barefoot-admin', 'barefoot_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'ajaxurl' => admin_url('admin-ajax.php'), // Add both for compatibility
+                'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('barefoot_nonce'),
                 'plugin_url' => BAREFOOT_PLUGIN_URL,
             ));
-            
-            // Also print ajaxurl inline for WordPress admin compatibility
-            add_action('admin_print_scripts', function() {
-                echo '<script type="text/javascript">var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
-            });
+        }
+    }
+    
+    public function print_admin_inline_script() {
+        $screen = get_current_screen();
+        if ($screen && strpos($screen->id, 'barefoot') !== false) {
+            // Print JavaScript variables inline as a fallback
+            ?>
+            <script type="text/javascript">
+                var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+                var barefoot_ajax = {
+                    ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    nonce: '<?php echo wp_create_nonce('barefoot_nonce'); ?>',
+                    plugin_url: '<?php echo BAREFOOT_PLUGIN_URL; ?>'
+                };
+                console.log('Inline script loaded - barefoot_ajax:', barefoot_ajax);
+            </script>
+            <?php
         }
     }
     
