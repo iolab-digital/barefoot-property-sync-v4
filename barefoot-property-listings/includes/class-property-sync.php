@@ -178,65 +178,68 @@ class Barefoot_Property_Sync {
      */
     private function prepare_property_meta($property_data) {
         $meta = array(
-            // Core property information
+            // Core property information (lowercase field names from XML)
             '_barefoot_property_id' => $this->get_property_field($property_data, 'PropertyID'),
-            '_barefoot_property_code' => $this->get_property_field($property_data, 'Keyboardid'),
-            '_barefoot_property_title' => $this->get_property_field($property_data, 'PropertyTitle'),
-            '_barefoot_ext_description' => $this->get_property_field($property_data, 'Extdescription'),
+            '_barefoot_address_id' => $this->get_property_field($property_data, 'addressid'),
+            '_barefoot_keyboard_id' => $this->get_property_field($property_data, 'keyboardid'),
             
             // Property specifications
-            '_barefoot_occupancy' => $this->get_property_field($property_data, 'Occupancy'),
-            '_barefoot_sleeps_beds' => $this->get_property_field($property_data, 'SleepsBeds'),
-            '_barefoot_bedrooms' => $this->get_property_field($property_data, 'Bedrooms'),
-            '_barefoot_bathrooms' => $this->get_property_field($property_data, 'Bathrooms'),
-            '_barefoot_number_floors' => $this->get_property_field($property_data, 'NumberFloors'),
-            '_barefoot_unit_type' => $this->get_property_field($property_data, 'UnitType'),
-            '_barefoot_property_type' => $this->get_property_field($property_data, 'PropertyType'),
+            '_barefoot_occupancy' => $this->get_property_field($property_data, 'occupancy'),
+            '_barefoot_status' => $this->get_property_field($property_data, 'status'),
+            '_barefoot_deadline' => $this->get_property_field($property_data, 'deadline'),
             
-            // Address information
-            '_barefoot_address' => $this->get_property_field($property_data, 'PropAddress'),
-            '_barefoot_address_new' => $this->get_property_field($property_data, 'PropAddressNew'),
-            '_barefoot_street' => $this->get_property_field($property_data, 'Street'),
-            '_barefoot_street2' => $this->get_property_field($property_data, 'Street2'),
-            '_barefoot_city' => $this->get_property_field($property_data, 'City'),
-            '_barefoot_state' => $this->get_property_field($property_data, 'State'),
-            '_barefoot_zip' => $this->get_property_field($property_data, 'Zip'),
-            '_barefoot_country' => $this->get_property_field($property_data, 'Country'),
+            // Address information  
+            '_barefoot_prop_address' => $this->get_property_field($property_data, 'propAddress'),
+            '_barefoot_prop_address_new' => $this->get_property_field($property_data, 'propAddressNew'),
+            '_barefoot_street' => $this->get_property_field($property_data, 'street'),
+            '_barefoot_street2' => $this->get_property_field($property_data, 'street2'),
+            '_barefoot_city' => $this->get_property_field($property_data, 'city'),
+            '_barefoot_state' => $this->get_property_field($property_data, 'state'),
+            '_barefoot_zip' => $this->get_property_field($property_data, 'zip'),
+            '_barefoot_country' => $this->get_property_field($property_data, 'country'),
             
             // Location coordinates
             '_barefoot_latitude' => $this->get_property_field($property_data, 'Latitude'),
             '_barefoot_longitude' => $this->get_property_field($property_data, 'Longitude'),
             
             // Pricing information
-            '_barefoot_min_price' => $this->get_property_field($property_data, 'Minprice'),
-            '_barefoot_max_price' => $this->get_property_field($property_data, 'Maxprice'),
-            '_barefoot_min_days' => $this->get_property_field($property_data, 'Mindays'),
+            '_barefoot_min_price' => $this->get_property_field($property_data, 'minprice'),
+            '_barefoot_max_price' => $this->get_property_field($property_data, 'maxprice'),
             
-            // Property status and management
-            '_barefoot_status' => $this->get_property_field($property_data, 'Status'),
-            '_barefoot_deadline' => $this->get_property_field($property_data, 'Deadline'),
-            '_barefoot_image_path' => $this->get_property_field($property_data, 'Imagepath'),
+            // Extended description and media
+            '_barefoot_ext_description' => $this->get_property_field($property_data, 'extdescription'),
+            '_barefoot_internet_description' => $this->get_property_field($property_data, 'InternetDescription'),
+            '_barefoot_video_link' => $this->get_property_field($property_data, 'VideoLink'),
+            '_barefoot_image_path' => $this->get_property_field($property_data, 'imagepath'),
+            '_barefoot_property_title' => $this->get_property_field($property_data, 'PropertyTitle'),
+            '_barefoot_sleeps_beds' => $this->get_property_field($property_data, 'SleepsBeds'),
+            '_barefoot_number_floors' => $this->get_property_field($property_data, 'NumberFloors'),
+            '_barefoot_unit_type' => $this->get_property_field($property_data, 'UnitType'),
+            '_barefoot_property_type' => $this->get_property_field($property_data, 'PropertyType'),
             
-            // Amenities and features
-            '_barefoot_amenities' => $this->get_property_field($property_data, 'PropertyAmenities'),
-            '_barefoot_pool' => $this->get_property_field($property_data, 'Pool'),
-            '_barefoot_hot_tub' => $this->get_property_field($property_data, 'HotTub'),
-            '_barefoot_internet' => $this->get_property_field($property_data, 'Internet'),
-            '_barefoot_kitchen' => $this->get_property_field($property_data, 'Kitchen'),
-            '_barefoot_parking' => $this->get_property_field($property_data, 'Parking'),
-            '_barefoot_pets_allowed' => $this->get_property_field($property_data, 'PetsAllowed'),
+            // Agent information
+            '_barefoot_agent1' => $this->get_property_field($property_data, 'agent1'),
+            '_barefoot_agent2' => $this->get_property_field($property_data, 'agent2'),
+            '_barefoot_agent3' => $this->get_property_field($property_data, 'agent3'),
+            '_barefoot_agent_name' => $this->get_property_field($property_data, 'a246'),  // a246 field contains agent name
             
-            // Registration and agents
+            // Registration
             '_barefoot_registnumber' => $this->get_property_field($property_data, 'Registnumber'),
             '_barefoot_regist_expire_date' => $this->get_property_field($property_data, 'Registexpirdate'),
-            '_barefoot_agent1' => $this->get_property_field($property_data, 'Agent1'),
-            '_barefoot_agent2' => $this->get_property_field($property_data, 'Agent2'),
-            '_barefoot_agent3' => $this->get_property_field($property_data, 'Agent3'),
             
             // Sync tracking
             '_barefoot_last_sync' => current_time('mysql'),
             '_barefoot_sync_version' => BAREFOOT_VERSION
         );
+        
+        // Add all custom "a" fields (a7, a28, a53, etc.) - there are 104 total fields
+        if (is_array($property_data)) {
+            foreach ($property_data as $key => $value) {
+                if (preg_match('/^a\d+$/', $key) && !empty($value)) {
+                    $meta['_barefoot_' . $key] = $value;
+                }
+            }
+        }
         
         // Remove empty values
         return array_filter($meta, function($value) {
