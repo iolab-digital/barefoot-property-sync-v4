@@ -246,9 +246,11 @@ get_header(); ?>
                                     
                                     <?php
                                     $related_min_price = get_post_meta(get_the_ID(), '_barefoot_min_price', true);
-                                    if ($related_min_price):
+                                    if ($related_min_price && is_numeric($related_min_price)):
                                     ?>
-                                        <p class="related-price">From $<?php echo number_format($related_min_price); ?>/night</p>
+                                        <p class="related-price">From $<?php echo number_format(floatval($related_min_price)); ?>/week</p>
+                                    <?php elseif ($related_min_price): ?>
+                                        <p class="related-price"><?php echo esc_html($related_min_price); ?></p>
                                     <?php endif; ?>
                                 </div>
                             </div>
