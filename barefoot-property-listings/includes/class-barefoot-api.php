@@ -559,48 +559,112 @@ class Barefoot_API {
     }
     
     /**
-     * Get property images
+     * Get all images for a specific property
+     * Uses GetPropertyAllImgsXML method
      */
     public function get_property_images($property_id) {
-        if (!$this->soap_client) {
-            return array('success' => false, 'message' => 'SOAP client not available');
-        }
-        
         try {
-            $params = array_merge($this->get_auth_params(), array(
-                'propertyId' => $property_id
-            ));
-            
-            $response = $this->soap_client->GetPropertyAllImgs($params);
-            
-            if (isset($response->GetPropertyAllImgsResult)) {
-                $images = $response->GetPropertyAllImgsResult;
-                
-                // Handle different response formats
-                if (is_object($images)) {
-                    if (isset($images->ImageInfo)) {
-                        $images = $images->ImageInfo;
-                    }
+            if (!$this->soap_client) {
+                if (!$this->_init_client()) {
+                    return array(
+                        'success' => false,
+                        'message' => 'Failed to initialize SOAP client'
+                    );
                 }
-                
-                // Ensure we have an array
-                if (!is_array($images)) {
-                    $images = array($images);
-                }
-                
-                return array(
-                    'success' => true,
-                    'data' => $images,
-                    'count' => count($images)
-                );
             }
             
-            return array('success' => true, 'data' => array(), 'count' => 0);
+            $params = array_merge(
+                $this->get_auth_params(),
+                array('propertyId' => $property_id)
+            );
+            
+            error_log("Barefoot API: Fetching images for property ID: {$property_id}");
+            
+            $response = $this->soap_client->GetPropertyAllImgsXML($params);
+            
+            if (isset($response->GetPropertyAllImgsXMLResult)) {
+                $result = $response->GetPropertyAllImgsXMLResult;
+                
+                // Parse the XML response
+                $xml_string = is_string($result) ? $result : (isset($result->any) ? $result->any : '');
+                
+                if (!empty($xml_string)) {
+                    $images = $this->parse_property_images_xml($xml_string);
+                    
+                    error_log("Barefoot API: Found " . count($images) . " images for property {$property_id}");
+                    
+                    return array(
+                        'success' => true,
+                        'images' => $images,
+                        'count' => count($images)
+                    );
+                }
+            }
+            
+            return array(
+                'success' => false,
+                'message' => 'No images found for property',
+                'images' => array()
+            );
             
         } catch (Exception $e) {
-            error_log('Barefoot GetPropertyAllImgs Error: ' . $e->getMessage());
-            return array('success' => false, 'message' => 'API Error: ' . $e->getMessage());
+            error_log("Barefoot API: Error fetching images for property {$property_id}: " . $e->getMessage());
+            return array(
+                'success' => false,
+                'message' => $e->getMessage(),
+                'images' => array()
+            );
         }
+    }
+    
+    /**
+     * Parse property images XML response
+     */
+    private function parse_property_images_xml($xml_string) {
+        $images = array();
+        
+        libxml_use_internal_errors(true);
+        
+        // Remove outer <string> wrapper if present
+        if (strpos($xml_string, '<string') !== false && strpos($xml_string, '</string>') !== false) {
+            $start = strpos($xml_string, '<Property>');
+            $end = strpos($xml_string, '</Property>') + strlen('</Property>');
+            if ($start !== false && $end > $start) {
+                $xml_string = substr($xml_string, $start, $end - $start);
+            }
+        }
+        
+        $xml = simplexml_load_string($xml_string);
+        
+        if ($xml !== false) {
+            $property_img_nodes = $xml->xpath('//PropertyImg');
+            
+            if (!empty($property_img_nodes)) {
+                foreach ($property_img_nodes as $img_node) {
+                    $image = array(
+                        'property_id' => (string)$img_node->propertyId,
+                        'image_no' => (int)$img_node->imageNo,
+                        'image_url' => (string)$img_node->imagepath,
+                        'description' => (string)$img_node->imageDesc
+                    );
+                    
+                    if (!empty($image['image_url'])) {
+                        $images[] = $image;
+                    }
+                }
+            }
+        } else {
+            $errors = libxml_get_errors();
+            error_log('Barefoot API: XML parsing failed for images: ' . print_r($errors, true));
+            libxml_clear_errors();
+        }
+        
+        // Sort by image_no
+        usort($images, function($a, $b) {
+            return $a['image_no'] - $b['image_no'];
+        });
+        
+        return $images;
     }
     
     /**
