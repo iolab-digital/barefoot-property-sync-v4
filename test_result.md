@@ -204,6 +204,18 @@ backend:
         - agent: "testing"
         - comment: "VERIFIED: WordPress custom post types properly registered. barefoot_property post type created with proper labels, capabilities, and features. Taxonomies registered: property_type, amenity, location. Plugin activation creates default terms. SOAP extension requirements properly checked with user notifications."
 
+  - task: "Sync property images from GetPropertyAllImgsXML API"
+    implemented: true
+    working: "NA"
+    file: "/app/barefoot-property-listings/includes/class-property-sync.php"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added image synchronization using GetPropertyAllImgsXML API method. Images are fetched, downloaded to WordPress media library, and attached to property posts. First image is set as featured image. Fixed bug where sync_property_images checked 'data' key instead of 'images' key. Updated field names to match parse_property_images_xml output. Includes duplicate detection and comprehensive error logging. Ready for testing."
+
 frontend:
   - task: "WordPress plugin frontend display"
     implemented: true
