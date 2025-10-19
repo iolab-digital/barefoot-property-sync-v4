@@ -218,15 +218,25 @@ class BarefootPropertyListings {
     }
     
     public function enqueue_admin_assets($hook) {
+        // Only load on our plugin pages
         if (strpos($hook, 'barefoot') !== false) {
+            // Enqueue admin CSS
             wp_enqueue_style('barefoot-admin', BAREFOOT_PLUGIN_URL . 'assets/css/admin.css', array(), BAREFOOT_VERSION);
+            
+            // Enqueue admin JS with jQuery dependency
             wp_enqueue_script('barefoot-admin', BAREFOOT_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), BAREFOOT_VERSION, true);
             
+            // IMPORTANT: Localize script AFTER enqueuing
+            // This passes PHP variables to JavaScript
             wp_localize_script('barefoot-admin', 'barefoot_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'ajaxurl' => admin_url('admin-ajax.php'), // Add both for compatibility
                 'nonce' => wp_create_nonce('barefoot_nonce'),
+                'plugin_url' => BAREFOOT_PLUGIN_URL,
             ));
+            
+            // Also make sure WordPress's global ajaxurl is available
+            echo '<script type="text/javascript">var ajaxurl = "' . admin_url('admin-ajax.php') . '";</script>';
         }
     }
     
