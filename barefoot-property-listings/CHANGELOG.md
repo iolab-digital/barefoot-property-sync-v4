@@ -2,6 +2,31 @@
 
 All notable changes to the Barefoot Property Listings plugin.
 
+## [1.2.0] - 2025-01-18
+
+### 🎉 New Feature - Property Image Synchronization
+- **ADDED:** Automatic image sync using `GetPropertyAllImgsXML` API method
+- **FEATURE:** Downloads property images to WordPress media library
+- **FEATURE:** Sets first image as featured image (post thumbnail)
+- **FEATURE:** Creates image galleries attached to property posts
+- **FEATURE:** Duplicate detection prevents re-downloading existing images
+- **RESULT:** Property pages now display full image galleries with proper thumbnails
+
+### Changed
+- Enhanced `class-barefoot-api.php` with `get_property_images()` method
+- Added XML parsing for property images with `parse_property_images_xml()`
+- Updated `class-property-sync.php` to sync images during property sync
+- Added `download_and_attach_image()` method with WordPress media integration
+- Comprehensive error logging for image download and attachment process
+- Images synced in batch during property synchronization
+
+### Technical Details
+- **API Method:** `GetPropertyAllImgsXML` (returns all images for a property)
+- **Image Storage:** WordPress uploads directory via `wp_upload_bits()`
+- **Image Processing:** Full WordPress attachment metadata generation
+- **Duplicate Detection:** Tracks original image URLs to prevent duplicates
+- **Resync Behavior:** Replaces existing images on re-sync
+
 ## [1.1.0] - 2025-01-18
 
 ### 🎉 Major Fix - API Integration Working
