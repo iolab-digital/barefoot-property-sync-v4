@@ -293,8 +293,117 @@ function barefoot_ajax_property_inquiry() {
     }
 }
 
+/**
+ * AJAX handler for syncing images for all properties
+ */
+function barefoot_ajax_sync_images() {
+    // Verify nonce
+    check_ajax_referer('barefoot_nonce', 'nonce');
+    
+    // Check user permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => __('Insufficient permissions', 'barefoot-properties')));
+    }
+    
+    try {
+        // Get all properties
+        $properties = get_posts(array(
+            'post_type' => 'barefoot_property',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                array(
+                    'key' => '_barefoot_property_id',
+                    'compare' => 'EXISTS'
+                )
+            )
+        ));
+        
+        if (empty($properties)) {
+            wp_send_json_error(array(
+                'message' => __('No properties found. Please sync properties first.', 'barefoot-properties')
+            ));
+        }
+        
+        $sync = new Barefoot_Property_Sync();
+        $total_images = 0;
+        $properties_synced = 0;
+        $errors = array();
+        
+        // Use reflection to access private method
+        $reflection = new ReflectionClass($sync);
+        $method = $reflection->getMethod('sync_property_images');
+        $method->setAccessible(true);
+        
+        foreach ($properties as $property) {
+            $property_id = get_post_meta($property->ID, '_barefoot_property_id', true);
+            
+            if (empty($property_id)) {
+                continue;
+            }
+            
+            try {
+                // Sync images for this property
+                $method->invoke($sync, $property->ID, $property_id);
+                
+                // Count attachments for this property
+                $attachments = get_posts(array(
+                    'post_type' => 'attachment',
+                    'post_parent' => $property->ID,
+                    'posts_per_page' => -1
+                ));
+                
+                $total_images += count($attachments);
+                $properties_synced++;
+                
+            } catch (Exception $e) {
+                $errors[] = "Property {$property->post_title}: " . $e->getMessage();
+            }
+        }
+        
+        // Log the sync result
+        $sync_logs = get_option('barefoot_image_sync_history', array());
+        $sync_logs[] = array(
+            'date' => current_time('mysql'),
+            'properties_synced' => $properties_synced,
+            'total_images' => $total_images,
+            'errors' => $errors
+        );
+        
+        // Keep only last 50 logs
+        if (count($sync_logs) > 50) {
+            $sync_logs = array_slice($sync_logs, -50);
+        }
+        
+        update_option('barefoot_image_sync_history', $sync_logs);
+        
+        $message = sprintf(
+            __('Image sync complete! Synced images for %d properties. Total images: %d', 'barefoot-properties'),
+            $properties_synced,
+            $total_images
+        );
+        
+        if (!empty($errors)) {
+            $message .= ' (' . count($errors) . ' errors occurred)';
+        }
+        
+        wp_send_json_success(array(
+            'message' => $message,
+            'properties_synced' => $properties_synced,
+            'total_images' => $total_images,
+            'errors' => $errors
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array(
+            'message' => 'Image sync failed: ' . $e->getMessage()
+        ));
+    }
+}
+
 // Register AJAX handlers for admin
 add_action('wp_ajax_barefoot_sync_properties', 'barefoot_ajax_sync_properties');
+add_action('wp_ajax_barefoot_sync_images', 'barefoot_ajax_sync_images');
 add_action('wp_ajax_barefoot_test_connection', 'barefoot_ajax_test_connection');
 add_action('wp_ajax_barefoot_test_get_properties', 'barefoot_ajax_test_get_properties');
 add_action('wp_ajax_barefoot_get_api_functions', 'barefoot_ajax_get_api_functions');
