@@ -176,6 +176,10 @@ class Barefoot_Admin_Page {
                         <?php _e('Sync All Properties', 'barefoot-properties'); ?>
                     </button>
                     
+                    <button id="sync-images" class="button button-primary button-large" style="background: #2271b1;">
+                        <?php _e('📸 Sync Images', 'barefoot-properties'); ?>
+                    </button>
+                    
                     <button id="test-api-connection" class="button button-secondary">
                         <?php _e('Test API Connection', 'barefoot-properties'); ?>
                     </button>
@@ -183,6 +187,10 @@ class Barefoot_Admin_Page {
                     <button id="cleanup-orphaned" class="button button-secondary">
                         <?php _e('Cleanup Orphaned Properties', 'barefoot-properties'); ?>
                     </button>
+                    
+                    <p class="description" style="margin-top: 10px;">
+                        <?php _e('<strong>Tip:</strong> First click "Sync All Properties" to sync property data. Then click "Sync Images" to download property images separately.', 'barefoot-properties'); ?>
+                    </p>
                 </div>
                 
                 <div class="sync-progress" style="display: none;">
