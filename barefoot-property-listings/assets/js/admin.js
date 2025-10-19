@@ -179,6 +179,56 @@
                 $button.text(originalText).prop('disabled', false);
             });
         });
+        
+        // Sync images
+        $(document).on('click', '#sync-images', function(e) {
+            e.preventDefault();
+            console.log('Sync images button clicked');
+            
+            var $button = $(this);
+            var originalText = $button.text();
+            
+            $button.text('📥 Downloading Images...').prop('disabled', true);
+            showProgress('Downloading property images from Barefoot API...');
+            
+            $.post(ajaxUrl, {
+                action: 'barefoot_sync_images',
+                nonce: barefoot_ajax.nonce
+            })
+            .done(function(response) {
+                console.log('Image sync response:', response);
+                hideProgress();
+                
+                if (response && response.success) {
+                    showResults({
+                        success: true,
+                        message: response.data.message,
+                        count: response.data.properties_synced,
+                        total_images: response.data.total_images,
+                        errors: response.data.errors || []
+                    });
+                } else {
+                    showResults({
+                        success: false,
+                        message: (response && response.data && response.data.message) ? response.data.message : 'Image sync failed - no response',
+                        errors: []
+                    });
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error('Image sync AJAX failed:', status, error);
+                console.error('Response:', xhr.responseText);
+                hideProgress();
+                showResults({
+                    success: false,
+                    message: 'AJAX request failed: ' + error + ' (Status: ' + status + ')',
+                    errors: []
+                });
+            })
+            .always(function() {
+                $button.text(originalText).prop('disabled', false);
+            });
+        });
     }
     
     /**
