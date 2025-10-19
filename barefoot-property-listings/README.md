@@ -6,6 +6,8 @@ A WordPress plugin that integrates with Barefoot Property Management System's SO
 
 - **Full SOAP API Integration** - Connect to Barefoot Property Management System
 - **Property Synchronization** - Automatically sync properties from Barefoot API
+- **Image Gallery Sync** - Downloads property images to WordPress media library
+- **Featured Images** - Automatically sets first image as post thumbnail
 - **Custom Post Type** - Properties stored as WordPress custom post type
 - **Admin Interface** - Easy-to-use admin dashboard for managing properties
 - **Frontend Display** - Templates for displaying properties on your website
@@ -13,9 +15,10 @@ A WordPress plugin that integrates with Barefoot Property Management System's SO
 
 ## ✅ Current Status
 
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **API Integration:** ✅ WORKING - Successfully retrieves 95+ properties  
-**Method:** Uses `GetProperty` SOAP method  
+**Image Sync:** ✅ WORKING - Downloads images to WordPress media library  
+**Method:** Uses `GetProperty` and `GetPropertyAllImgsXML` SOAP methods  
 **Tested:** January 2025
 
 ## 📋 Requirements
